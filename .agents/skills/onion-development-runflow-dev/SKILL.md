@@ -8,24 +8,20 @@ disable-model-invocation: true
 
 Skill especializada para desenvolvimento completo com Runflow SDK usando o especialista Runflow. Facilita criação de projetos, agentes, workflows, RAG e integrações, sempre orientando próximos passos e fechamento de tarefas.
 
-> **Delegação:** sempre que esta skill indicar "`@runflow-specialist [solicitação]`", delegue via tool `spawn_agent`: "Leia `.agents/onion/specialists/runflow-specialist.md` e atue como esse especialista" passando a solicitação detalhada como prompt.
-
-## Requisitos do Usuário
-<requirements>
-{$INPUT}
-</requirements>
-
 ## Processo
 
 ### 1. Invocar Agente Especialista
 
-**SEMPRE** invoque o especialista Runflow para todas as operações, delegando via tool `spawn_agent`: "Leia `.agents/onion/specialists/runflow-specialist.md` e atue como esse especialista":
+**SEMPRE** invoque o especialista Runflow via tool `spawn_agent`:
 
 ```
-@runflow-specialist [sua solicitação detalhada]
+spawn_agent → "Leia .agents/onion/specialists/runflow-specialist.md e atue como
+esse especialista para: [sua solicitação detalhada].
+Contexto do projeto: [descreva o projeto/agente/workflow envolvido].
+Retorne código completo, validação e próximos passos."
 ```
 
-O agente possui conhecimento completo da base de conhecimento em `docs/knowledge-base/platforms/runflow.md` e padrões do projeto.
+O especialista possui conhecimento completo da base de conhecimento em `docs/knowledge-base/platforms/runflow.md` e padrões do projeto.
 
 ### 2. Operações Disponíveis
 
@@ -33,12 +29,15 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 
 **Quando usar**: Iniciar um novo projeto do zero com Runflow SDK
 
-**Comando**:
+**Delegação via `spawn_agent`**:
 ```
-@runflow-specialist Criar novo projeto Runflow com nome [nome-do-projeto]. Deve incluir: estrutura de diretórios, package.json, tsconfig.json, arquivo main.ts com agente básico, configuração .runflow/rf.json, e README.md
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+criar novo projeto Runflow com nome [nome-do-projeto]. Deve incluir: estrutura de
+diretórios, package.json, tsconfig.json, arquivo main.ts com agente básico,
+configuração .runflow/rf.json, e README.md"
 ```
 
-**O que o agente fará**:
+**O que o especialista fará**:
 1. Criar estrutura de diretórios completa
 2. Configurar `package.json` com dependências Runflow
 3. Configurar `tsconfig.json` para TypeScript
@@ -47,21 +46,25 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 6. Gerar `README.md` com instruções
 7. Validar código e sugerir próximos passos
 
-**Exemplo de uso**:
+**Exemplo de prompt para spawn_agent**:
 ```
-@runflow-specialist Criar novo projeto Runflow chamado "assistente-juridico" para ajudar com processos jurídicos
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+criar novo projeto Runflow chamado 'assistente-juridico' para ajudar com processos
+jurídicos. Retorne estrutura completa e instruções de setup."
 ```
 
 #### 2.2. Criar Novo Agente Runflow
 
 **Quando usar**: Adicionar novo agente a projeto existente
 
-**Comando**:
+**Delegação via `spawn_agent`**:
 ```
-@runflow-specialist Criar novo agente Runflow chamado [nome] com as seguintes características: [descrição detalhada das funcionalidades, tools necessárias, se precisa RAG, memory, etc.]
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+criar novo agente Runflow chamado [nome] com as seguintes características:
+[descrição detalhada das funcionalidades, tools necessárias, se precisa RAG, memory, etc.]"
 ```
 
-**O que o agente fará**:
+**O que o especialista fará**:
 1. Analisar requisitos e consultar base de conhecimento
 2. Verificar padrões existentes no projeto (`main.ts`)
 3. Criar agente seguindo estrutura do projeto
@@ -70,151 +73,172 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 6. Validar código e criar testes básicos
 7. Documentar uso e próximos passos
 
-**Exemplo de uso**:
+**Exemplo de prompt para spawn_agent**:
 ```
-@runflow-specialist Criar agente chamado "ProcessAnalyzer" que analisa processos jurídicos. Precisa de: tool para buscar processos por número, RAG com base "processos", memory para lembrar análises anteriores, e responder em português brasileiro
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+criar agente chamado 'ProcessAnalyzer' que analisa processos jurídicos. Precisa de:
+tool para buscar processos por número, RAG com base 'processos', memory para lembrar
+análises anteriores, e responder em português brasileiro. Retorne código completo."
 ```
 
 #### 2.3. Conectar Agentes (Multi-Agent System)
 
 **Quando usar**: Criar sistema com múltiplos agentes especializados e supervisor
 
-**Comando**:
+**Delegação via `spawn_agent`**:
 ```
-@runflow-specialist Criar sistema multi-agente com supervisor que roteia para: [lista de agentes especializados]. Supervisor deve: [critérios de roteamento]. Cada agente especializado: [descrição de cada um]
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+criar sistema multi-agente com supervisor que roteia para: [lista de agentes].
+Supervisor deve: [critérios de roteamento]. Cada agente especializado: [descrição]"
 ```
 
-**O que o agente fará**:
+**O que o especialista fará**:
 1. Criar agentes especializados individuais
 2. Criar agente supervisor com lógica de roteamento
 3. Implementar função de roteamento inteligente
 4. Configurar comunicação entre agentes
 5. Criar exemplo de uso completo
 6. Documentar arquitetura e fluxo
-7. Sugerir melhorias e otimizações
 
-**Exemplo de uso**:
+**Exemplo de prompt para spawn_agent**:
 ```
-@runflow-specialist Criar sistema multi-agente com supervisor que roteia para: SalesAgent (vendas), SupportAgent (suporte técnico), BillingAgent (cobrança). Supervisor analisa intenção e roteia automaticamente. Cada agente tem suas próprias tools e RAG específicos
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+criar sistema multi-agente com supervisor que roteia para: SalesAgent (vendas),
+SupportAgent (suporte técnico), BillingAgent (cobrança). Supervisor analisa intenção e
+roteia automaticamente. Cada agente tem suas próprias tools e RAG específicos."
 ```
 
 #### 2.4. Criar Projeto RAG (Base de Conhecimento)
 
 **Quando usar**: Configurar RAG para busca semântica em base de conhecimento
 
-**Comando**:
+**Delegação via `spawn_agent`**:
 ```
-@runflow-specialist Configurar RAG para base de conhecimento "[nome-da-base]" com as seguintes características: [tipo de conteúdo, threshold, k resultados, quando usar busca]. Integrar com agente [nome-do-agente]
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+configurar RAG para base '[nome-da-base]' com: [tipo de conteúdo, threshold, k resultados,
+quando usar busca]. Integrar com agente [nome-do-agente]."
 ```
 
-**O que o agente fará**:
+**O que o especialista fará**:
 1. Verificar se base de conhecimento existe na plataforma Runflow
 2. Configurar RAG no agente com parâmetros otimizados
 3. Criar searchPrompt apropriado para o contexto
 4. Implementar exemplo de uso
 5. Documentar configuração e ajustes recomendados
-6. Sugerir otimizações de threshold e k
 
-**Exemplo de uso**:
+**Exemplo de prompt para spawn_agent**:
 ```
-@runflow-specialist Configurar RAG para base "processos-juridicos" no agente ProcessAnalyzer. Threshold 0.2, k=3 resultados. Buscar quando usuário perguntar sobre processos, previdência, intimações. Criar searchPrompt apropriado
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+configurar RAG para base 'processos-juridicos' no agente ProcessAnalyzer. Threshold 0.2,
+k=3 resultados. Buscar quando usuário perguntar sobre processos, previdência, intimações.
+Criar searchPrompt apropriado."
 ```
 
 #### 2.5. Criar Workflow Completo
 
 **Quando usar**: Orquestrar múltiplos passos com agentes e conectores
 
-**Comando**:
+**Delegação via `spawn_agent`**:
 ```
-@runflow-specialist Criar workflow "[nome]" que: [descrição passo a passo do fluxo]. Incluir: [agentes envolvidos, conectores necessários, passos condicionais se houver]
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+criar workflow '[nome]' que: [descrição passo a passo]. Incluir:
+[agentes envolvidos, conectores necessários, passos condicionais se houver]."
 ```
 
-**O que o agente fará**:
+**O que o especialista fará**:
 1. Definir schema de entrada e saída com Zod
 2. Criar agentes necessários para cada passo
 3. Configurar conectores (HubSpot, Twilio, etc.)
 4. Implementar workflow com passos sequenciais/paralelos
 5. Adicionar passos condicionais se necessário
-6. Criar exemplo de execução
-7. Documentar fluxo completo
+6. Criar exemplo de execução e documentar fluxo
 
-**Exemplo de uso**:
+**Exemplo de prompt para spawn_agent**:
 ```
-@runflow-specialist Criar workflow "lead-qualification" que: 1) qualifica lead com agente, 2) se nota >= 7 cria contato no HubSpot, 3) cria deal, 4) notifica equipe no Slack. Se nota < 7, apenas registra
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+criar workflow 'lead-qualification' que: 1) qualifica lead com agente, 2) se nota >= 7
+cria contato no HubSpot, 3) cria deal, 4) notifica equipe no Slack. Se nota < 7, apenas
+registra. Retorne código completo e exemplo de execução."
 ```
 
 #### 2.6. Orientar Próximos Passos
 
-**Quando usar**: Após qualquer operação, pedir orientação sobre próximos passos
+**Quando usar**: Após qualquer operação, pedir orientação sobre o que fazer a seguir
 
-**Comando**:
+**Delegação via `spawn_agent`**:
 ```
-@runflow-specialist Quais são os próximos passos após [o que foi feito]? Sugerir: comandos para testar, melhorias possíveis, integrações recomendadas, e próximas tarefas
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+orientar os próximos passos após [o que foi feito]. Sugerir: comandos para testar,
+melhorias possíveis, integrações recomendadas, e próximas tarefas."
 ```
 
-**O que o agente fará**:
+**O que o especialista fará**:
 1. Analisar o que foi criado/modificado
 2. Sugerir comandos de teste apropriados
 3. Identificar melhorias e otimizações
 4. Recomendar integrações úteis
-5. Criar TODO list se necessário
-6. Fornecer comandos específicos para próximas ações
+5. Fornecer comandos específicos para próximas ações
 
-**Exemplo de uso**:
+**Exemplo de prompt para spawn_agent**:
 ```
-@runflow-specialist Quais são os próximos passos após criar o agente ProcessAnalyzer? Sugerir comandos para testar, melhorias e próximas tarefas
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+orientar os próximos passos após criar o agente ProcessAnalyzer. Sugerir comandos
+para testar, melhorias e próximas tarefas."
 ```
 
 #### 2.7. Fechar Tarefa / Finalizar Desenvolvimento
 
 **Quando usar**: Quando uma feature está completa e precisa ser finalizada
 
-**Comando**:
+**Delegação via `spawn_agent`**:
 ```
-@runflow-specialist Finalizar desenvolvimento de [feature/tarefa]. Verificar: código completo, testes, documentação, validação, e criar resumo do que foi implementado
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+finalizar o desenvolvimento de [feature/tarefa]. Verificar: código completo, testes,
+documentação, validação, e criar resumo do que foi implementado."
 ```
 
-**O que o agente fará**:
+**O que o especialista fará**:
 1. Revisar código completo criado
 2. Validar com linter
 3. Verificar se testes estão implementados
 4. Confirmar documentação atualizada
 5. Criar resumo executivo do que foi feito
 6. Sugerir comandos para deploy/teste final
-7. Marcar tarefas como concluídas
 
-**Exemplo de uso**:
+**Exemplo de prompt para spawn_agent**:
 ```
-@runflow-specialist Finalizar desenvolvimento do sistema multi-agente de suporte. Verificar tudo e criar resumo
+"Leia .agents/onion/specialists/runflow-specialist.md e atue como esse especialista para:
+finalizar o desenvolvimento do sistema multi-agente de suporte. Verificar tudo e
+criar resumo completo."
 ```
 
 ### 3. Fluxo de Trabalho Recomendado
 
 #### Para Novo Projeto Completo:
-1. **Criar projeto**: `@runflow-specialist Criar novo projeto Runflow...`
-2. **Criar agente inicial**: `@runflow-specialist Criar agente...`
-3. **Configurar RAG**: `@runflow-specialist Configurar RAG...`
-4. **Testar**: `@runflow-specialist Quais são os próximos passos...`
-5. **Finalizar**: `@runflow-specialist Finalizar desenvolvimento...`
+1. **Criar projeto**: `spawn_agent` → `"...runflow-specialist.md...criar novo projeto Runflow..."`
+2. **Criar agente inicial**: `spawn_agent` → `"...runflow-specialist.md...criar agente..."`
+3. **Configurar RAG**: `spawn_agent` → `"...runflow-specialist.md...configurar RAG..."`
+4. **Testar**: `spawn_agent` → `"...runflow-specialist.md...orientar próximos passos..."`
+5. **Finalizar**: `spawn_agent` → `"...runflow-specialist.md...finalizar desenvolvimento..."`
 
 #### Para Adicionar Feature:
-1. **Criar agente/feature**: `@runflow-specialist Criar [tipo]...`
-2. **Integrar**: `@runflow-specialist Conectar [agentes/workflows]...`
-3. **Orientar**: `@runflow-specialist Quais são os próximos passos...`
-4. **Finalizar**: `@runflow-specialist Finalizar desenvolvimento...`
+1. **Criar agente/feature**: `spawn_agent` → `"...runflow-specialist.md...criar [tipo]..."`
+2. **Integrar**: `spawn_agent` → `"...runflow-specialist.md...conectar [agentes/workflows]..."`
+3. **Orientar**: `spawn_agent` → `"...runflow-specialist.md...orientar próximos passos..."`
+4. **Finalizar**: `spawn_agent` → `"...runflow-specialist.md...finalizar desenvolvimento..."`
 
 ## Guidelines
 
 ### ✅ Boas Práticas
 
 **Sempre**:
-- ✅ Use o especialista Runflow para todas as operações Runflow
-- ✅ Seja específico e detalhado nas solicitações
+- ✅ Delegue ao especialista Runflow via `spawn_agent` para todas as operações
+- ✅ Seja específico e detalhado nos prompts de delegação
 - ✅ Mencione requisitos técnicos (RAG, memory, tools, etc.)
 - ✅ Peça orientação de próximos passos após criar algo
 - ✅ Finalize tarefas explicitamente para documentação
 
-**Estrutura de Solicitações**:
+**Estrutura de Prompts para spawn_agent**:
 - ✅ Inclua nome do projeto/agente/feature
 - ✅ Descreva funcionalidades desejadas
 - ✅ Especifique tools necessárias
@@ -251,7 +275,7 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 
 ### ❌ O Que Evitar
 
-**Solicitações**:
+**Prompts de delegação**:
 - ❌ Não seja vago: "criar agente" → "criar agente X que faz Y com tools Z"
 - ❌ Não pule etapas: configure RAG antes de usar no agente
 - ❌ Não ignore validação: sempre teste após criar código
@@ -272,25 +296,19 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 
 **Input**:
 ```
-/onion-development-runflow-dev Criar projeto completo "assistente-juridico" para análise de processos. Incluir: agente principal, RAG com base "processos-juridicos", tool para buscar processos, memory para contexto
+/onion-development-runflow-dev Criar projeto completo "assistente-juridico" para análise
+de processos. Incluir: agente principal, RAG com base "processos-juridicos", tool para
+buscar processos, memory para contexto
 ```
 
 **Processo**:
-1. Invoca o especialista Runflow para criar projeto
-2. Agente cria estrutura completa
-3. Invoca novamente para criar agente principal
+1. Delega via `spawn_agent` para criar projeto
+2. Especialista cria estrutura completa
+3. Nova delegação via `spawn_agent` para criar agente principal
 4. Configura RAG
 5. Cria tool de busca
 6. Orienta próximos passos
 7. Finaliza com resumo
-
-**Output esperado**:
-- Projeto criado com estrutura completa
-- Agente configurado e funcionando
-- RAG conectado
-- Tool implementada
-- README com instruções
-- Comandos para testar
 
 ---
 
@@ -298,23 +316,16 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 
 **Input**:
 ```
-/onion-development-runflow-dev Criar sistema multi-agente com supervisor que roteia para Sales, Support e Billing. Cada um com suas próprias tools e RAG
+/onion-development-runflow-dev Criar sistema multi-agente com supervisor que roteia para
+Sales, Support e Billing. Cada um com suas próprias tools e RAG
 ```
 
 **Processo**:
-1. Invoca o especialista Runflow para criar agentes especializados
+1. Delega via `spawn_agent` para criar agentes especializados
 2. Cria agente supervisor
 3. Implementa roteamento
 4. Configura RAG específico para cada agente
-5. Cria exemplo de uso
-6. Orienta testes e melhorias
-
-**Output esperado**:
-- 3 agentes especializados criados
-- Supervisor com roteamento inteligente
-- Função de roteamento implementada
-- Exemplo completo de uso
-- Documentação da arquitetura
+5. Cria exemplo de uso e orienta testes
 
 ---
 
@@ -322,22 +333,15 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 
 **Input**:
 ```
-/onion-development-runflow-dev Configurar RAG no agente ProcessAnalyzer com base "processos". Depois orientar próximos passos
+/onion-development-runflow-dev Configurar RAG no agente ProcessAnalyzer com base
+"processos". Depois orientar próximos passos
 ```
 
 **Processo**:
-1. Invoca o especialista Runflow para configurar RAG
-2. Ajusta parâmetros (threshold, k, searchPrompt)
-3. Valida configuração
-4. Invoca novamente para orientar próximos passos
-5. Sugere comandos de teste e melhorias
-
-**Output esperado**:
-- RAG configurado no agente
-- Parâmetros otimizados
-- Lista de comandos para testar
-- Sugestões de melhorias
-- Próximas tarefas recomendadas
+1. Delega via `spawn_agent` para configurar RAG
+2. Especialista ajusta parâmetros (threshold, k, searchPrompt)
+3. Nova delegação via `spawn_agent` para orientar próximos passos
+4. Sugere comandos de teste e melhorias
 
 ---
 
@@ -345,24 +349,14 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 
 **Input**:
 ```
-/onion-development-runflow-dev Finalizar desenvolvimento do sistema de suporte completo. Verificar tudo e criar resumo
+/onion-development-runflow-dev Finalizar desenvolvimento do sistema de suporte completo.
+Verificar tudo e criar resumo
 ```
 
 **Processo**:
-1. Invoca o especialista Runflow para revisar código
-2. Valida com linter
-3. Verifica testes
-4. Confirma documentação
-5. Cria resumo executivo
-6. Sugere deploy/teste final
-
-**Output esperado**:
-- Código validado
-- Testes verificados
-- Documentação atualizada
-- Resumo executivo criado
-- Comandos para deploy/teste final
-- Tarefas marcadas como concluídas
+1. Delega via `spawn_agent` para revisar e validar código
+2. Especialista verifica testes e documentação
+3. Cria resumo executivo e sugere deploy/teste final
 
 ## Checklist de Validação
 
@@ -373,8 +367,8 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 - [ ] Verificou se projeto Runflow existe (para novos agentes)
 
 ### Durante Criação
-- [ ] O especialista Runflow foi invocado corretamente
-- [ ] Solicitação foi específica e detalhada
+- [ ] O especialista Runflow foi invocado via `spawn_agent`
+- [ ] Prompt de delegação foi específico e detalhado
 - [ ] Código gerado segue padrões do projeto
 - [ ] Validação foi executada
 
@@ -394,42 +388,41 @@ O agente possui conhecimento completo da base de conhecimento em `docs/knowledge
 
 ## Comandos Relacionados
 
-- `/onion-meta-create-agent` - Criar agente especializado
-- `/onion-development-runflow-dev` - Esta skill (desenvolvimento Runflow)
-- `/onion-meta-create-knowledge-base` - Criar base de conhecimento
+- `/onion-meta-create-agent` — criar agente especializado
+- `/onion-meta-create-knowledge-base` — criar base de conhecimento
 
 ## Troubleshooting
 
-### Problema: Agente não encontra base de conhecimento
-**Solução**: Verifique se base existe na plataforma Runflow antes de configurar RAG
+### Agente não encontra base de conhecimento
+Verifique se base existe na plataforma Runflow antes de configurar RAG.
 
-### Problema: Erro no trace collector
-**Solução**: Use `observability: 'minimal'` em todos os agentes
+### Erro no trace collector
+Use `observability: 'minimal'` em todos os agentes.
 
-### Problema: Agente não segue padrões do projeto
-**Solução**: Mencione explicitamente "seguir padrões de main.ts" na solicitação
+### Agente não segue padrões do projeto
+Mencione explicitamente "seguir padrões de main.ts" no prompt de delegação.
 
-### Problema: Roteamento multi-agente não funciona
-**Solução**: Verifique critérios de roteamento no supervisor e teste com diferentes inputs
+### Roteamento multi-agente não funciona
+Verifique critérios de roteamento no supervisor e teste com diferentes inputs.
 
-### Problema: Workflow falha em algum passo
-**Solução**: Revise schemas de entrada/saída e tratamento de erros em cada passo
+### Workflow falha em algum passo
+Revise schemas de entrada/saída e tratamento de erros em cada passo.
 
 ## FAQ
 
-**P: Posso criar múltiplos agentes de uma vez?**  
-R: Sim! Use solicitação detalhada listando todos os agentes e suas características.
+**P: Posso criar múltiplos agentes de uma vez?**
+R: Sim! Use um prompt de delegação detalhado listando todos os agentes e suas características.
 
-**P: Como testar agentes criados?**  
-R: Use `rf test` após criar, ou peça orientação: `@runflow-specialist Quais são os próximos passos...`
+**P: Como testar agentes criados?**
+R: Use `rf test` após criar, ou delegue via `spawn_agent` pedindo orientação de próximos passos.
 
-**P: Posso modificar código gerado pelo agente?**  
-R: Sim! O agente cria código seguindo padrões, mas você pode ajustar conforme necessário.
+**P: Posso modificar código gerado pelo especialista?**
+R: Sim! O especialista cria código seguindo padrões, mas você pode ajustar conforme necessário.
 
-**P: Como conectar agentes existentes?**  
-R: Use: `@runflow-specialist Conectar agente [A] com agente [B] através de [método: supervisor/workflow]`
+**P: Como conectar agentes existentes?**
+R: Delegue via `spawn_agent`: `"...runflow-specialist.md...conectar agente [A] com agente [B] através de [método: supervisor/workflow]"`.
 
-**P: RAG precisa ser configurado antes ou depois do agente?**  
+**P: RAG precisa ser configurado antes ou depois do agente?**
 R: Pode ser configurado junto na criação do agente, ou adicionado depois modificando o código.
 
 ---
@@ -438,8 +431,10 @@ R: Pode ser configurado junto na criação do agente, ou adicionado depois modif
 
 **Sintaxe básica**:
 ```
-/onion-development-runflow-dev [sua solicitação detalhada para o especialista Runflow]
+/onion-development-runflow-dev [descreva o que você quer criar/fazer com o Runflow SDK]
 ```
+
+A skill delega todas as operações ao `runflow-specialist` via `spawn_agent`.
 
 **Operações principais**:
 1. Criar novo projeto Runflow
@@ -448,25 +443,4 @@ R: Pode ser configurado junto na criação do agente, ou adicionado depois modif
 4. Configurar RAG
 5. Criar workflows
 6. Orientar próximos passos
-7. Finalizar desenvolvimento
-
-**O que acontece**:
-1. A skill invoca o especialista Runflow com sua solicitação
-2. Agente consulta base de conhecimento e padrões do projeto
-3. Cria/modifica código seguindo melhores práticas
-4. Valida e orienta próximos passos
-5. Finaliza com resumo quando solicitado
-
-**Output**:
-- Código Runflow seguindo padrões do projeto
-- Configurações apropriadas
-- Documentação atualizada
-- Orientação de próximos passos
-- Resumo executivo quando finalizar
-
----
-
-**Exemplo de uso completo**:
-```
-/onion-development-runflow-dev Criar projeto "assistente-juridico" com agente que analisa processos usando RAG na base "processos-juridicos"
-```
+7. Fechar/finalizar desenvolvimento

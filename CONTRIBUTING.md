@@ -2,13 +2,13 @@
 
 Obrigado por considerar contribuir com o Onion!
 
-O Onion é um **framework template em `.claude/`** — instalável em qualquer
+O Onion é um **framework nativo do Zed** (`.agents/` + `.zed/`) — instalável em qualquer
 projeto (novo, legado ou regulado) para orquestrar produto, engenharia e
-compliance com Claude Code. **Não é produto npm, não é distribuído publicamente
-e não tem CLI standalone.** Plataforma única: **Claude Code**.
+compliance. **Não é produto npm, não é distribuído publicamente
+e não tem CLI standalone.** Plataforma única: **Zed**.
 
-Por isso, contribuir aqui é **escrever Markdown + YAML** (comandos, agentes,
-skills, knowledge bases e documentação) — não código JavaScript/Node.
+Por isso, contribuir aqui é **escrever Markdown** (skills, specialists,
+knowledge bases e documentação) — não código JavaScript/Node.
 
 ---
 
@@ -34,18 +34,19 @@ Seja respeitoso, colaborativo, inclusivo e profissional em todas as interações
 ## 🚀 Pré-requisitos
 
 - **Git**
-- **Claude Code** (plataforma única do framework)
+- **Zed** (plataforma única do framework)
 
-Não há toolchain de build: o Onion é interpretado em runtime pelo Claude Code a
-partir de `.claude/` (Markdown + YAML). Não há `package.json`, Node ou pnpm.
+Não há toolchain de build: o Onion é interpretado em runtime pelo Zed a
+partir de `.agents/` (Markdown). Não há `package.json`, Node ou pnpm.
 
 ```bash
 # 1. Fork e clone
-git clone https://github.com/your-username/onion-claude.git
-cd onion-claude
+git clone https://github.com/your-username/onion-zed.git
+cd onion-zed
 
-# 2. Abra no Claude Code — comandos, agentes e skills carregam automaticamente.
-#    Para começar: /warm-up e depois /onion
+# 2. Abra no Zed e confie no worktree (worktree trust) — skills e specialists
+#    carregam automaticamente a partir de .agents/skills/.
+#    Para começar: /onion-warmup e depois /onion
 ```
 
 ---
@@ -53,35 +54,41 @@ cd onion-claude
 ## 🛠️ Estrutura do projeto
 
 ```
-onion-claude/
-├── .claude/                # Sistema Onion operacional
-│   ├── commands/           # Comandos por categoria (Markdown + frontmatter)
-│   ├── agents/             # Agentes especializados por domínio
-│   ├── skills/             # Skills (cérebro reutilizável)
-│   ├── utils/              # Utilitários (incl. task-manager abstraction)
-│   └── settings.json       # Hooks + permissions (versionado)
-├── docs/                   # Documentação (Spec as Code)
-│   ├── meta-specs/         # L0 — "constituição" do framework
-│   ├── knowledge-base/     # Knowledge bases estruturadas
-│   ├── business-context/   # Gerado por /docs:build-business-docs
-│   ├── technical-context/  # Gerado por /docs:build-tech-docs
-│   └── onion/              # Guias e referências
-└── CLAUDE.md               # Project rules carregados pelo Claude Code
+onion-zed/
+├── .agents/                    # Sistema Onion operacional (nativo Zed)
+│   ├── skills/                 # Skills (catálogo flat, onion-<cat>-<cmd>/)
+│   │   └── onion-<cat>-<cmd>/
+│   │       └── SKILL.md
+│   └── onion/
+│       ├── specialists/        # Specialists delegáveis via spawn_agent
+│       ├── utils/              # Utilitários (incl. task-manager abstraction)
+│       ├── templates/          # Fragmentos de template reutilizáveis
+│       ├── prompts/            # Fragmentos de prompt compartilhados
+│       └── sessions/           # Estado runtime de workflows faseados
+├── .zed/
+│   └── settings.json           # Modelos, permissões, context_servers (MCP)
+├── docs/                       # Documentação (Spec as Code)
+│   ├── meta-specs/             # L0 — "constituição" do framework
+│   ├── knowledge-base/         # Knowledge bases estruturadas
+│   ├── business-context/       # Gerado por /onion-docs-build-business-docs
+│   ├── technical-context/      # Gerado por /onion-docs-build-tech-docs
+│   └── onion/                  # Guias e referências
+└── AGENTS.md                   # Rules nativas do Zed (lidas automaticamente)
 ```
 
 ---
 
 ## 🤝 Tipos de contribuição
 
-- **🐛 Bugs** — abra uma issue com: comando/agente envolvido, o que aconteceu,
+- **🐛 Bugs** — abra uma issue com: skill/specialist envolvido, o que aconteceu,
   comportamento esperado, passos de reprodução.
-- **✨ Novos comandos/agentes/skills** — use os criadores do próprio framework:
-  `/meta:create-command`, `/meta:create-agent`, `/meta:create-skill`. Eles já
+- **✨ Novas skills/specialists** — use os criadores do próprio framework:
+  `/onion-meta-create-skill`, `/onion-meta-create-agent`. Eles já
   aplicam os padrões das meta-specs.
 - **📚 Documentação e knowledge bases** — correções, clareza, exemplos,
-  `/meta:create-knowledge-base`.
+  `/onion-meta-create-knowledge-base`.
 - **🔌 Integrações (Task Manager)** — novos adapters seguindo o padrão SDAAL em
-  `.claude/utils/task-manager/` (ver `docs/meta-specs/integrations.md`).
+  `.agents/onion/utils/task-manager/` (ver `docs/meta-specs/integrations.md`).
 
 ---
 
@@ -92,21 +99,25 @@ Consulte antes de criar/alterar artefatos:
 
 | Você vai mexer em… | Consulte |
 |---|---|
-| Agente | [`agents.md`](docs/meta-specs/agents.md) — YAML obrigatório, categorias, limites de tamanho |
-| Comando | [`commands.md`](docs/meta-specs/commands.md) — frontmatter, `allowed-tools` (§1.3), workflows faseados, limites (§5) |
-| Arquitetura/estrutura | [`architecture.md`](docs/meta-specs/architecture.md) — framework instalável, dependências |
+| Specialist | [`agents.md`](docs/meta-specs/agents.md) — frontmatter mínimo, naming kebab-case, limite ≤300 linhas |
+| Skill | [`commands.md`](docs/meta-specs/commands.md) — frontmatter Zed, catálogo flat, workflows faseados, limite ≤500 linhas |
+| Arquitetura/estrutura | [`architecture.md`](docs/meta-specs/architecture.md) — framework instalável, dependências permitidas |
 | Idioma/estilo/naming | [`code-standards.md`](docs/meta-specs/code-standards.md) |
-| Integração externa | [`integrations.md`](docs/meta-specs/integrations.md) — adapters, `.env`, `.mcp.json` |
+| Integração externa | [`integrations.md`](docs/meta-specs/integrations.md) — adapters, `.env`, `context_servers` |
 
 Pontos-chave:
 
-- **Tamanho**: agente ≤1.200 linhas (hard >1.500); comando ≤500 (hard >800).
-  Excedeu? Extraia conteúdo de referência para `docs/knowledge-base/` e mantenha
-  o artefato como orquestrador enxuto.
-- **`allowed-tools`** em comandos sensíveis (git/escrita/Task Manager) — escopo
-  mínimo (ver `commands.md §1.3`).
-- **Frontmatter YAML obrigatório** em comandos (`description`) e agentes
-  (`name`, `description`, `tools`, `model`).
+- **Tamanho skills**: ≤500 linhas (hard limit). Excedeu? Extraia para `docs/knowledge-base/`
+  ou `.agents/onion/templates/`.
+- **Tamanho specialists**: ≤300 linhas (hard limit). Excedeu? Extraia para KB e mantenha
+  como persona enxuta.
+- **Frontmatter de skills**: apenas `name`, `description`, `disable-model-invocation`
+  (sem `allowed-tools`, `model`, `category` — campos inexistentes no Zed).
+- **Frontmatter de specialists**: apenas `name` e `description`.
+- **Tool names** em snake_case Zed: `read_file`, `write_file`, `edit_file`, `terminal`,
+  `grep`, `find_path`, `list_directory`, `fetch`, `spawn_agent`, `search_web`.
+- **Permissões globais** em `.zed/settings.json` (`agent.tool_permissions`) — nunca por
+  skill ou specialist.
 - **Sem assunções sobre o projeto-alvo**: nada de path absoluto; o framework é
   instalável em qualquer repo.
 
@@ -115,7 +126,7 @@ Pontos-chave:
 ## 🔀 Fluxo de Pull Request
 
 1. **Branch** a partir de `main` (GitFlow): `feature/...` ou `fix/...`
-   (ou use `/git:feature:start`).
+   (ou use `/onion-git-feature-start`).
 2. **Mude** seguindo as meta-specs; atualize docs/índices afetados.
 3. **Valide** localmente (ver abaixo).
 4. **Commit** com Conventional Commits **em pt-BR** (ver próxima seção).
@@ -134,9 +145,9 @@ Convenção do Onion (ver `code-standards.md`):
   [Conventional Commits](https://www.conventionalcommits.org/).
 
 ```bash
-git commit -m "feat(product): adiciona comando de priorização de backlog"
+git commit -m "feat(product): adiciona skill de priorização de backlog"
 git commit -m "fix(task-manager): corrige detecção de provider ausente no .env"
-git commit -m "docs(meta-specs): esclarece convenção de allowed-tools"
+git commit -m "docs(meta-specs): esclarece convenção de frontmatter Zed"
 ```
 
 Tipos: `feat`, `fix`, `docs`, `refactor`, `chore`, `test`, `style`, `perf`.
@@ -147,18 +158,18 @@ Tipos: `feat`, `fix`, `docs`, `refactor`, `chore`, `test`, `style`, `perf`.
 
 Antes de abrir o PR:
 
-- `/validate/workflow` — completude de workflows.
+- `/onion-validate-workflow` — completude de workflows.
 - Skills `onion-validation` e `onion-patterns` — conformidade de artefatos
-  (YAML, categorias, limites de tamanho, naming).
-- `@metaspec-gate-keeper` — validação de conformidade arquitetural contra as
-  5 meta-specs.
+  (frontmatter, categorias, limites de tamanho, naming).
+- `/onion-meta-metaspec-validate` ou `spawn_agent` → `specialists/metaspec-gate-keeper.md`
+  — validação de conformidade arquitetural contra as 5 meta-specs L0.
 
 Checklist:
 
 - [ ] Segue as meta-specs aplicáveis.
-- [ ] Frontmatter YAML correto.
+- [ ] Frontmatter correto (apenas campos válidos no Zed).
 - [ ] Dentro dos limites de tamanho (ou refatorado com extração para KB).
-- [ ] Documentação/índices atualizados (`/docs:build-index` se necessário).
+- [ ] Documentação/índices atualizados (`/onion-docs-build-index` se necessário).
 - [ ] Commits em pt-BR, Conventional Commits.
 
 ---
@@ -166,8 +177,10 @@ Checklist:
 ## 🔗 Links úteis
 
 - [Identidade e visão geral (README)](README.md)
+- [Guia de uso no Zed](ONION-ZED-GUIA.md)
 - [Índice da documentação](docs/INDEX.md)
 - [Meta-specs (constituição)](docs/meta-specs/index.md)
+- [ADR 0001 — Port nativo Zed](docs/meta-specs/adr/0001-zed-native-port.md)
 - [Guias de aplicação](docs/applying/) — greenfield, legado, regulado
 
 ---

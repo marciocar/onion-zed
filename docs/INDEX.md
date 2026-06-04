@@ -1,6 +1,6 @@
 # 📚 Índice Central de Documentação
 
-> **Última atualização**: 2026-05-18 | **Gerado por**: `/docs:build-index` | **Revisado**: auditoria manual
+> **Última atualização**: 2026-06-04 | **Gerado por**: `/onion-docs-build-index` | **Revisado**: auditoria de compatibilidade Zed
 
 Bem-vindo ao índice central de documentação do projeto. Este documento serve como hub de navegação para toda a documentação disponível.
 
@@ -36,33 +36,17 @@ Este projeto é o **Sistema Onion** — um framework **nativo do Zed** (`.agents
 - **1 arquivo** em `docs/meta-specs/` (Meta Especificações)
 - Arquivos adicionais em `docs/analysis/`, `docs/plans/`, `docs/business-context/`, `docs/technical-context/`
 
-### Sistema Onion (`.claude/`)
-- **78 comandos invocáveis** Claude Code distribuídos em:
-  - 20 em `product/` (gestão de produto e descoberta)
-  - 12 em `git/` (GitFlow e versionamento)
-  - 11 em `engineer/` (engenharia e desenvolvimento)
-  - 11 em `docs/` (geração e validação de documentação)
-  - 11 em `meta/` (meta-comandos, criadores e validação)
-  - 6 em `validate/` (validação e testes)
-  - 3 em `test/` (unit, integration, e2e)
-  - 1 em `development/`, 1 em `quick/`
-  - 2 no root: `onion.md`, `warm-up.md`
-  - **não-invocáveis**: 12 fragmentos em `common/` (5 templates + 7 prompts) e 3 READMEs de categoria
-- **4 skills** em `.claude/skills/` (`onion`, `onion-patterns`, `onion-validation`, `language-standards`)
-- **49 agentes** IA distribuídos em:
-  - 20 em `development/` (frontend, backend, infra, integrações)
-  - 8 em `product/` (gestão e narrativa)
-  - 5 em `compliance/` (ISO 27001, ISO 22301, SOC2, PMBOK, governance)
-  - 5 em `meta/` (orquestração, criação, validação, skills)
-  - 4 em `git/` (review pré-PR)
-  - 3 em `testing/`, 2 em `review/`
-  - 1 em `research/`, 1 em `deployment/`
+### Sistema Onion — Estado atual (nativo Zed)
+- **81 skills invocáveis** em `.agents/skills/` (catálogo flat `onion-<cat>-<cmd>`)
+- **49 specialists** delegáveis via `spawn_agent` em `.agents/onion/specialists/`
+- **5 core skills**: `onion`, `onion-warmup`, `onion-patterns`, `onion-validation`, `language-standards`
+
+> **Referência histórica (legado Claude Code):** antes do port nativo Zed (2026-06-03), o sistema tinha 78 comandos em `.claude/commands/` e 49 agentes nomeados em `.claude/agents/`. Esses artefatos foram migrados para skills e specialists. Ver [ADR 0001](meta-specs/adr/0001-zed-native-port.md).
 
 ### Total
 - **66 arquivos** de documentação markdown
-- **78 comandos invocáveis** em 9 categorias + root (+ 12 fragmentos `common/` + 3 READMEs)
-- **49 agentes** especializados em 9 categorias
-- **4 skills** (`.claude/skills/`)
+- **81 skills** em `.agents/skills/`
+- **49 specialists** em `.agents/onion/specialists/`
 
 ---
 
@@ -218,7 +202,7 @@ Knowledge Bases estruturadas para consumo por IA e referência técnica:
 
 ## 🏗️ Meta Especificações
 
-Especificações de nível mais alto que servem como "constituição" do Sistema Onion. **As 5 meta-specs L0 foram criadas em 2026-05-18** como parte do saneamento e ativam a validação via `@metaspec-gate-keeper`:
+Especificações de nível mais alto que servem como "constituição" do Sistema Onion. **As 5 meta-specs L0 foram reescritas em 2026-06-03 para Zed** (v2.0.0). Validação via `spawn_agent` → `specialists/metaspec-gate-keeper.md`:
 
 - **[Índice de Meta Specs](meta-specs/index.md)** - Visão geral das meta especificações
 - **[agents.md](meta-specs/agents.md)** ✨ NOVO - Padrões obrigatórios para agentes (YAML, categorias, naming, limites)
@@ -269,19 +253,19 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 3. [Fluxos de Engenharia](onion/engineering-flows.md)
 4. [Sistema de Testes e Validação](onion/testing-validation-system.md)
 
-**Comandos essenciais:**
-- `/engineer/start` - Iniciar desenvolvimento
-- `/engineer/work` - Trabalhar em feature
-- `/engineer/pr` - Criar Pull Request
-- `/test/unit` - Testes unitários
-- `/test/integration` - Testes de integração
+**Skills essenciais:**
+- `/onion-engineer-start` — iniciar desenvolvimento
+- `/onion-engineer-work` — trabalhar em feature
+- `/onion-engineer-pr` — criar Pull Request
+- `/onion-test-unit` — testes unitários
+- `/onion-test-integration` — testes de integração
 
-**Agentes especializados:**
-- `@react-developer` - Desenvolvimento React
-- `@nodejs-specialist` - Backend Node.js
-- `@nx-monorepo-specialist` - Monorepos NX
-- `@c4-architecture-specialist` - Arquitetura C4
-- `@whisper-specialist` - Transcrição de áudio com Whisper
+**Specialists (delegue via `spawn_agent`):**
+- `react-developer` — desenvolvimento React
+- `nodejs-specialist` — backend Node.js
+- `nx-monorepo-specialist` — monorepos NX
+- `c4-architecture-specialist` — arquitetura C4
+- `whisper-specialist` — transcrição de áudio com Whisper
 
 ### 📋 Para Product Owners
 
@@ -291,24 +275,22 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 3. [Knowledge Base - Story Points](knowledge-base/frameworks/framework_story_points.md)
 4. [Knowledge Base - Spec-Driven Development](knowledge-base/concepts/spec-driven-development.md) ✨ NOVO
 
-**Comandos essenciais:**
-- `/product/task` - Criar tasks estruturadas
-- `/product/spec` - Especificações técnicas
-- `/product/estimate` - Estimar story points
-- `/product/extract-meeting` - Extrair insights de reuniões
-- `/product/consolidate-meetings` - Consolidação de múltiplas reuniões
-- `/product/convert-to-tasks` - Converter documentos consolidados em tasks
-- `/product/whisper` - Facilitador para uso do Whisper
-- `/docs/consolidate-documents` - Consolidar múltiplos documentos
-- `/validate/collab/three-amigos` - Sessões colaborativas
+**Skills essenciais:**
+- `/onion-product-task` — criar tasks estruturadas
+- `/onion-product-spec` — especificações técnicas
+- `/onion-product-estimate` — estimar story points
+- `/onion-product-extract-meeting` — extrair insights de reuniões
+- `/onion-product-whisper` — facilitador para uso do Whisper
+- `/onion-docs-consolidate-documents` — consolidar múltiplos documentos
+- `/onion-validate-collab-three-amigos` — sessões colaborativas
 
-**Agentes especializados:**
-- `@product-agent` - Orquestração de produto
-- `@story-points-framework-specialist` - Estimativas ágeis
-- `@storytelling-business-specialist` - Narrativas de negócio
-- `@branding-positioning-specialist` - Branding e posicionamento
-- `@extract-meeting-specialist` - Extração de reuniões
-- `@meeting-consolidator` - Consolidação de reuniões
+**Specialists (delegue via `spawn_agent`):**
+- `product-agent` — orquestração de produto
+- `story-points-framework-specialist` — estimativas ágeis
+- `storytelling-business-specialist` — narrativas de negócio
+- `branding-positioning-specialist` — branding e posicionamento
+- `extract-meeting-specialist` — extração de reuniões
+- `meeting-consolidator` — consolidação de reuniões
 
 ### 🧪 Para QA/Test Engineers
 
@@ -317,18 +299,18 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 2. [Framework de Testes](knowledge-base/frameworks/framework_testes.md)
 3. [Guia de Comandos](onion/commands-guide.md) - Seção "Comandos de Validação"
 
-**Comandos essenciais:**
-- `/test/unit` - Testes unitários (White-box)
-- `/test/integration` - Testes de integração (Grey-box)
-- `/test/e2e` - Testes end-to-end (Black-box)
-- `/validate/test-strategy/create` - Criar estratégias de teste
-- `/validate/qa-points/estimate` - Estimar QA points
-- `/validate/collab/pair-testing` - Teste em par
+**Skills essenciais:**
+- `/onion-test-unit` — testes unitários (White-box)
+- `/onion-test-integration` — testes de integração (Grey-box)
+- `/onion-test-e2e` — testes end-to-end (Black-box)
+- `/onion-validate-test-strategy-create` — criar estratégias de teste
+- `/onion-validate-qa-points-estimate` — estimar QA points
+- `/onion-validate-collab-pair-testing` — teste em par
 
-**Agentes especializados:**
-- `@test-agent` - Estratégias completas de teste
-- `@test-engineer` - Implementação prática
-- `@test-planner` - Planejamento e cobertura
+**Specialists (delegue via `spawn_agent`):**
+- `test-agent` — estratégias completas de teste
+- `test-engineer` — implementação prática
+- `test-planner` — planejamento e cobertura
 
 ### 🏗️ Para Arquitetos
 
@@ -338,8 +320,8 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 3. [Revisão Analítica do Sistema Onion — Maio/2026](analysis/onion-review-2026-05.md)
 
 **Recursos:**
-- Agentes de arquitetura: `@c4-architecture-specialist`, `@mermaid-specialist`
-- Comandos de documentação: `/docs/build-tech-docs`, `/docs/reverse-consolidate`
+- Specialists de arquitetura: `c4-architecture-specialist`, `mermaid-specialist` (via `spawn_agent`)
+- Skills de documentação: `/onion-docs-build-tech-docs`, `/onion-docs-reverse-consolidate`
 - Knowledge Bases: [SDAAL](knowledge-base/concepts/specification-driven-ai-abstraction-layer.md), [Spec-Driven Development](knowledge-base/concepts/spec-driven-development.md) ✨ NOVO
 
 ### 🔧 Para Administradores do Sistema
@@ -349,10 +331,10 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 2. [Guias de Aplicação](applying/README.md)
 3. [Referência de Ferramentas](onion/tools-reference.md)
 
-**Comandos essenciais:**
-- `/meta:setup-integration` - Configurar Task Manager (Jira/ClickUp/Asana/Linear) e demais integrações
-- `/meta:all-tools` - Listar todas as ferramentas
-- `/docs:build-index` - Reconstruir índices
+**Skills essenciais:**
+- `/onion-meta-setup-integration` — configurar Task Manager (Jira/ClickUp/Asana/Linear) e demais integrações
+- `/onion-meta-all-tools` — listar todas as ferramentas
+- `/onion-docs-build-index` — reconstruir índices
 
 ### 🛡️ Para Compliance/Security
 
@@ -360,12 +342,12 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 1. [Agentes de Compliance](onion/agents-reference.md#️-agentes-de-compliance)
 2. [Comandos de Validação](onion/commands-guide.md#-comandos-de-validação)
 
-**Agentes especializados:**
-- `@iso-27001-specialist` - ISO 27001:2022
-- `@iso-22301-specialist` - ISO 22301:2019
-- `@soc2-specialist` - SOC2 Type II
-- `@security-information-master` - Segurança da informação
-- `@corporate-compliance-specialist` - Compliance corporativo
+**Specialists (delegue via `spawn_agent`):**
+- `iso-27001-specialist` — ISO 27001:2022
+- `iso-22301-specialist` — ISO 22301:2019
+- `soc2-specialist` — SOC2 Type II
+- `security-information-master` — segurança da informação
+- `corporate-compliance-specialist` — compliance corporativo
 
 ---
 
@@ -384,27 +366,31 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 
 ### Por Categoria de Comando
 
-| Categoria | Comandos | Documentação |
-|-----------|---------|--------------|
-| 🔧 **Engenharia** | `/engineer/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-de-engenharia) |
-| 📋 **Produto** | `/product/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-de-produto) |
-| 🧪 **Testes** | `/test/*` | [Sistema de Testes](onion/testing-validation-system.md) |
-| ✅ **Validação** | `/validate/*` | [Sistema de Testes](onion/testing-validation-system.md) |
-| 📚 **Documentação** | `/docs/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-de-documentação) |
-| 🌿 **Git** | `/git/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-git) |
-| ⚙️ **Meta** | `/meta/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-meta) |
-| 🧅 **Onion** | `/onion/*` | [Sistema Onion](onion/) |
-| ⚡ **Quick** | `/quick/*` | [Guia de Comandos](onion/commands-guide.md) |
+| Categoria | Skills | Documentação |
+|-----------|--------|--------------|
+| 🔧 **Engenharia** | `/onion-engineer-*` | [Guia de Comandos](onion/commands-guide.md) |
+| 📋 **Produto** | `/onion-product-*` | [Guia de Comandos](onion/commands-guide.md) |
+| 🧪 **Testes** | `/onion-test-*` | [Sistema de Testes](onion/testing-validation-system.md) |
+| ✅ **Validação** | `/onion-validate-*` | [Sistema de Testes](onion/testing-validation-system.md) |
+| 📚 **Documentação** | `/onion-docs-*` | [Guia de Comandos](onion/commands-guide.md) |
+| 🌿 **Git** | `/onion-git-*` | [Guia de Comandos](onion/commands-guide.md) |
+| ⚙️ **Meta** | `/onion-meta-*` | [Guia de Comandos](onion/commands-guide.md) |
+| 🧅 **Core** | `/onion`, `/onion-warmup` | [Sistema Onion](onion/) |
+| ⚡ **Quick / Dev** | `/onion-quick-*`, `/onion-development-*` | [Guia de Comandos](onion/commands-guide.md) |
 
-### Por Categoria de Agente
+### Por Specialist
 
-| Categoria | Agentes | Documentação |
-|-----------|---------|--------------|
-| 🛡️ **Compliance** | `compliance/` (5) | [Referência de Agentes](onion/agents-reference.md#️-agentes-de-compliance) |
-| 🔴 **Meta** | `meta/` (4) | [Referência de Agentes](onion/agents-reference.md#-agentes-meta) |
-| ⚙️ **Deployment** | `deployment/` (1) | [Referência de Agentes](onion/agents-reference.md) |
-| 🟣 **Pesquisa** | `research/` (1) | [Referência de Agentes](onion/agents-reference.md#-agentes-de-pesquisa) |
-| 🟢 **Review** | `review/` (1) | [Referência de Agentes](onion/agents-reference.md#-agentes-de-review) |
+| Família | Função | Exemplos de slug |
+|---------|--------|------------------|
+| **Desenvolvimento** | Stack técnica | `react-developer`, `nodejs-specialist`, `postgres-specialist` |
+| **Produto** | Discovery e spec | `product-agent`, `task-specialist`, `extract-meeting-specialist` |
+| **Compliance** | Frameworks regulatórios | `iso-27001-specialist`, `soc2-specialist`, `pmbok-specialist` |
+| **Meta** | Orquestração e criação | `onion`, `metaspec-gate-keeper`, `agent-creator-specialist` |
+| **Git** | GitFlow e review | `gitflow-specialist`, `branch-code-reviewer` |
+| **Testes** | Estratégia e implementação | `test-agent`, `test-engineer`, `test-planner` |
+| **Task Manager** | Provider ativo | `jira-specialist`, `clickup-specialist` |
+
+> Delegue via `spawn_agent` → `"Leia .agents/onion/specialists/<slug>.md e atue como esse especialista para: <tarefa>"`
 
 ---
 
@@ -430,7 +416,7 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 ### Configuração
 - [Configuração Inicial](onion/getting-started.md)
 - [Guias de Aplicação](applying/README.md)
-- [Adapters de Task Manager](../.claude/utils/task-manager/adapters/) (Jira, ClickUp, Asana, Linear)
+- [Adapters de Task Manager](../.agents/onion/utils/task-manager/adapters/) (Jira, ClickUp, Asana, Linear)
 
 ---
 

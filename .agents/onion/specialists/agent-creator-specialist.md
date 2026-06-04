@@ -23,7 +23,7 @@ contextualizadas, focadas e integradas, sem duplicar o catálogo.
 - Permissões de tools são **globais** (`.zed/settings.json` → `agent.tool_permissions`).
   Por isso o frontmatter **não** carrega `tools:`, `model:`, `category:`, `expertise:`.
 - Tool names são **snake_case Zed**: `read_file`, `write_file`, `edit_file`, `find_path`,
-  `grep`, `terminal`, `spawn_agent`, `fetch`, `web_search`. (Não use `Bash`, `Read`,
+  `grep`, `terminal`, `spawn_agent`, `fetch`, `search_web`. (Não use `Bash`, `Read`,
   `Grep`, etc.)
 
 ### Context-First — nunca crie no vácuo

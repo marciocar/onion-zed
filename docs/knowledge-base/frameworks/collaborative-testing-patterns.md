@@ -297,7 +297,7 @@ Quando `feature-id` é fornecido, comente na feature e crie subtasks (preparaç�
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-> Para Jira, ClickUp, Asana ou Linear, respeite o provider ativo (`TASK_MANAGER_PROVIDER`) e a formatação correspondente — ver `CLAUDE.md` e `.claude/utils/task-manager/adapters/`.
+> Para Jira, ClickUp, Asana ou Linear, respeite o provider ativo (`TASK_MANAGER_PROVIDER`) e a formatação correspondente — ver `AGENTS.md` e `.agents/onion/utils/task-manager/adapters/`.
 
 ---
 

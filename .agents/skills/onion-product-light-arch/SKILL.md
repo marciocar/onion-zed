@@ -48,10 +48,10 @@ Aqui é onde você colocará seu chapéu de super pensamento e considerará o me
 3. Construa uma proposta de arquitetura que se alinhe com os padrões e melhores práticas do projeto.
 
 Dicas:
-   - Use as ferramentas code-expert (se disponíveis) para encontrar arquivos específicos baseados nas respostas de descoberta
+   - Use `grep` ou `find_path` para encontrar arquivos específicos baseados nas respostas de descoberta
    - Mergulhe fundo em funcionalidades e padrões similares
    - Analise detalhes específicos de implementação
-   - Use `search_web` ou context7 para melhores práticas ou documentação de biblioteca (se necessário)
+   - Use `search_web` ou `fetch` para melhores práticas ou documentação de biblioteca (se necessário)
 
 Seu documento de arquitetura deve incluir:
     - Uma visão geral de alto nível do sistema (antes e depois da mudança)
@@ -73,7 +73,7 @@ Se ajudar a construir um diagrama MERMAID, sinta-se livre para fazê-lo.
 
 ## Pesquisa
 
-Se não tiver certeza de como uma biblioteca específica funciona, você pode usar Context7 e Perplexity para buscar informações sobre ela. Então, não tente adivinhar.
+Se não tiver certeza de como uma biblioteca específica funciona, use `search_web` ou `fetch` para buscar informações sobre ela. Então, não tente adivinhar.
 
 <feature-slug>
 #$ARGUMENTS

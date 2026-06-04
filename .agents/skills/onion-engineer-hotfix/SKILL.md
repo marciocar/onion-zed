@@ -32,30 +32,43 @@ if [[ ! "$CURRENT" =~ ^(main|master|develop)$ ]]; then
 fi
 ```
 
-### Passo 2: Criar Task Emergencial
+### Passo 2: Criar Task Emergencial (provider-aware)
 
-Via ClickUp MCP:
+Detectar o provider ativo lendo `.env`:
 
-```yaml
-name: "🔥 HOTFIX: {{description}}"
-list_id: [lista de hotfixes]
-priority: urgent
-tags:
-  - hotfix
-  - urgent
-  - {{tags}}
-status: "In Progress"
-markdown_description: |
-  ## 🚨 Emergency Hotfix
-  
-  **Descrição**: {{description}}
-  
-  ## 📋 Checklist
-  - [ ] Diagnóstico
-  - [ ] Implementação
-  - [ ] Testes
-  - [ ] Deploy
+```bash
+grep TASK_MANAGER_PROVIDER .env
 ```
+
+Delegar via `spawn_agent` ao specialist correto:
+
+| Provider | Specialist |
+|----------|------------|
+| `jira` | `specialists/jira-specialist.md` |
+| `clickup` | `specialists/clickup-specialist.md` |
+| `none` / ausente | `specialists/task-specialist.md` (offline) |
+
+**Prompt para spawn_agent** (adapte o specialist ao provider detectado):
+
+```
+"Leia .agents/onion/specialists/<provider>-specialist.md e atue como esse
+especialista para: criar uma task/issue emergencial de hotfix com:
+- Título: '🔥 HOTFIX: {{description}}'
+- Prioridade: máxima (urgent/highest)
+- Labels/tags: hotfix, urgent{{tags}}
+- Status inicial: Em progresso
+- Descrição:
+    ## 🚨 Emergency Hotfix
+    **Descrição**: {{description}}
+    ## 📋 Checklist
+    - [ ] Diagnóstico
+    - [ ] Implementação
+    - [ ] Testes
+    - [ ] Deploy
+Retorne o ID e URL da task criada."
+```
+
+Se `.env` ausente ou `TASK_MANAGER_PROVIDER=none`: registrar ID como `local` no context.md da sessão.
 
 ### Passo 3: Criar Branch Hotfix
 
@@ -83,8 +96,9 @@ cat > .agents/onion/sessions/hotfix-$(date +%Y%m%d)/context.md << EOF
 # Hotfix Context
 
 ## Task
+- Provider: [provider do .env]
 - ID: [task_id criado]
-- URL: [url do clickup]
+- URL: [url da task]
 
 ## Branch
 - Nome: $BRANCH
@@ -102,7 +116,7 @@ EOF
 🔥 HOTFIX INICIADO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📋 Task: [URL do ClickUp]
+📋 Task: [URL da task no Task Manager]
 🌿 Branch: hotfix/X.X.X-description
 
 ⚡ Próximos Passos:
@@ -122,9 +136,9 @@ EOF
 ✅ HOTFIX SETUP COMPLETO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📋 ClickUp:
+📋 Task Manager ([provider]):
 ∟ Task: 🔥 HOTFIX: {{description}}
-∟ ID: 86adfxxxx
+∟ ID: [task_id]
 ∟ Status: In Progress
 ∟ Priority: Urgent
 

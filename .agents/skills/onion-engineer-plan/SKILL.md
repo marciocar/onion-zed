@@ -64,10 +64,10 @@ Detalhes sobre a tarefa
 
 
 Dicas:
-   - Use repoprompt:search (se disponível) para encontrar arquivos específicos baseados nas respostas de descoberta
-   - Use repoprompt:set_selection e repoprompt:read_selected_files (se disponível) para ler código relevante em batch
+   - Use `grep` ou `find_path` para encontrar arquivos específicos baseados nas respostas de descoberta
+   - Use `read_file` para ler código relevante em batch
    - Analise detalhes específicos de implementação
-   - Use search_web e ou context7 para melhores práticas ou documentação de bibliotecas (se necessário)
+   - Use `search_web` ou `fetch` para melhores práticas ou documentação de bibliotecas (se necessário)
 
 No caso desta pesquisa levantar uma nova decisão arquitetural ou contradição com as decisões anteriores, você iniciará uma discussão sobre isso com o humano, concordará com as mudanças e atualizará o documento architecture.md para aquela funcionalidade se necessário.
 
