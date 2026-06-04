@@ -1,8 +1,10 @@
 # Sistema de Engenharia Reversa Universal - Guia de Uso
 
+> ⚠️ Doc legado — em revisão para o modelo Zed (ver [ADR 0001](../meta-specs/adr/0001-zed-native-port.md)). Caminhos e nomenclatura atualizados para skills `/onion-*` e specialists em `.agents/onion/specialists/`.
+
 ## 🎯 **Visão Geral**
 
-O Sistema de Engenharia Reversa Universal é um pré-processador inteligente que analisa qualquer projeto de software e gera documentação consolidada otimizada para `/docs/build-tech-docs`. 
+O Sistema de Engenharia Reversa Universal é um pré-processador inteligente que analisa qualquer projeto de software e gera documentação consolidada otimizada para `/onion-docs-build-tech-docs`. 
 
 ### **Benefícios**
 -  **Acelera 10x+** o processo de documentação técnica
@@ -15,12 +17,12 @@ O Sistema de Engenharia Reversa Universal é um pré-processador inteligente que
 
 ### **Passo 1: Analisar Projeto**
 ```bash
-/docs/reverse-consolidate /path/to/your/project
+/onion-docs-reverse-consolidate /path/to/your/project
 ```
 
 ### **Passo 2: Usar Output com build-tech-docs**
 ```bash
-/docs/build-tech-docs docs/onion/consolidated-project-documentation.md
+/onion-docs-build-tech-docs docs/onion/consolidated-project-documentation.md
 ```
 
 ### **Resultado: Documentação Completa**
@@ -30,8 +32,8 @@ O Sistema de Engenharia Reversa Universal é um pré-processador inteligente que
 
 ## 🏗️ **Componentes do Sistema**
 
-### **1. @docs-reverse-engineer (Agente Universal)**
-**Responsabilidade**: Análise inteligente de qualquer tipo de projeto
+### **1. `docs-reverse-engineer` (Specialist Universal, via `spawn_agent`)**
+**Responsabilidade**: Análise inteligente de qualquer tipo de projeto (persona em `.agents/onion/specialists/docs-reverse-engineer.md`)
 
 **Capacidades**:
 - **Project Type Detection**: React SPA, Node.js API, Python Django, Full-stack, Generic
@@ -39,7 +41,7 @@ O Sistema de Engenharia Reversa Universal é um pré-processador inteligente que
 - **Hierarchical Analysis**: 6 níveis de análise sequencial organizada
 - **Pattern Recognition**: MVC, microserviços, component-based, etc.
 
-### **2. /docs/reverse-consolidate (Comando Orquestrador)**
+### **2. /onion-docs-reverse-consolidate (Skill Orquestradora)**
 **Responsabilidade**: Coordena todo processo de engenharia reversa
 
 **Workflow**:
@@ -143,13 +145,13 @@ performance_indicators: {
 ### **Template Selection Override**
 ```bash
 # Força uso de template específico
-/docs/reverse-consolidate /path/to/project --template=nodejs-api
+/onion-docs-reverse-consolidate /path/to/project --template=nodejs-api
 
 # Debug mode para troubleshooting  
-/docs/reverse-consolidate /path/to/project --debug --verbose
+/onion-docs-reverse-consolidate /path/to/project --debug --verbose
 
 # Custom output location
-/docs/reverse-consolidate /path/to/project --output=custom-analysis.md
+/onion-docs-reverse-consolidate /path/to/project --output=custom-analysis.md
 ```
 
 ### **Confidence Threshold**
@@ -273,7 +275,7 @@ Solução: Verificar YAML frontmatter syntax e seções obrigatórias
 
 ### **Debug Mode**
 ```bash
-/docs/reverse-consolidate /path/to/project --debug
+/onion-docs-reverse-consolidate /path/to/project --debug
 
 # Output detalhado:
 🔍 SCANNING: 127 files found
@@ -287,14 +289,14 @@ Solução: Verificar YAML frontmatter syntax e seções obrigatórias
 ## 🔄 **Workflow Recomendado**
 
 ### **Para Projetos Novos**
-1. **Scan inicial**: `$ /docs/reverse-consolidate /path/to/project`
+1. **Scan inicial**: `$ /onion-docs-reverse-consolidate /path/to/project`
 2. **Revisar output**: Verificar detection accuracy e completeness
 3. **Ajustar se necessário**: Usar --template override se detecção incorreta
-4. **Gerar docs**: `$ /docs/build-tech-docs docs/onion/consolidated-project-documentation.md`
+4. **Gerar docs**: `$ /onion-docs-build-tech-docs docs/onion/consolidated-project-documentation.md`
 5. **Finalizar**: Revisar 9 arquivos gerados e personalizar se necessário
 
 ### **Para Updates de Projeto**
-1. **Re-análise**: `$ /docs/reverse-consolidate /path/to/project` (sobrescreve análise anterior)
+1. **Re-análise**: `$ /onion-docs-reverse-consolidate /path/to/project` (sobrescreve análise anterior)
 2. **Compare changes**: Verificar mudanças na arquitetura ou dependencies
 3. **Update docs**: Re-executar build-tech-docs com novo input
 4. **Maintain**: Processo pode ser re-executado quantas vezes necessário
@@ -326,4 +328,4 @@ O **Sistema de Engenharia Reversa Universal** está completamente implementado e
 4. **⚡ Performance otimizada** para qualquer tamanho de projeto
 5. **🛠️ Error handling robusto** com fallbacks inteligentes
 
-**Próximo passo**: Execute `/docs/reverse-consolidate /path/to/seu/projeto` e experimente a aceleração do processo de documentação!
+**Próximo passo**: Execute `/onion-docs-reverse-consolidate /path/to/seu/projeto` e experimente a aceleração do processo de documentação!

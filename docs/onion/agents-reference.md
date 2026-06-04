@@ -1,12 +1,20 @@
-# 🤖 Referência de Agentes
+# 🤖 Referência de Specialists
 
-> **Versão**: 4.1.0-beta.1 | **Última atualização**: 2026-05-15 | **Total**: 49 agentes em 9 categorias
+> **Última atualização**: 2026-06-03 | **Total**: 49 specialists em 9 categorias | **Plataforma**: Zed (ver [ADR 0001](../meta-specs/adr/0001-zed-native-port.md))
 
-Este guia documenta todos os agentes especializados disponíveis no sistema `.claude/`, suas capacidades e quando utilizá-los.
+Este guia documenta todos os specialists disponíveis no Sistema Onion (nativo Zed), em `.agents/onion/specialists/`, suas capacidades e quando delegá-los.
 
-## 📊 Resumo v3.0
+## 🔁 Como delegar a um specialist (modelo Zed)
 
-| Categoria | Agentes | Descrição |
+No Zed não existem subagentes nomeados invocáveis por `@`. Cada specialist é uma **persona** em `.agents/onion/specialists/<slug>.md`. Para delegar, use a tool **`spawn_agent`** com um prompt do tipo:
+
+> *"Leia `.agents/onion/specialists/<slug>.md` e atue como esse especialista para: \<tarefa>"*
+
+O subagente herda as mesmas tools e tem janela de contexto própria. Nos exemplos abaixo, onde aparece `spawn_agent → <slug>` leia-se "delegue via `spawn_agent` ao specialist `<slug>`".
+
+## 📊 Resumo por categoria
+
+| Categoria | Specialists | Descrição |
 |-----------|---------|-----------|
 | `development/` | 16 | Desenvolvimento (Python, React, Postgres, etc.) |
 | `compliance/` | 5 | Compliance e regulatório |
@@ -17,26 +25,27 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 | `testing/` | 2 | Testes (engineer, planner) |
 | `research/` | 1 | Pesquisa |
 | `deployment/` | 1 | Deployment |
-| **Total** | **38** | |
 
-## 📋 Índice de Agentes
+> Os specialists residem em `.agents/onion/specialists/<slug>.md` (catálogo de personas).
 
-- [🔵 Agentes de Desenvolvimento](#-agentes-de-desenvolvimento) (16)
-- [🔷 Agentes de Testes](#-agentes-de-testes) (2)
-- [🟢 Agentes de Review](#-agentes-de-review) (2)
-- [🟣 Agentes de Pesquisa](#-agentes-de-pesquisa) (1)
-- [🔴 Agentes Meta](#-agentes-meta) (4)
-- [🌲 Agentes Git](#-agentes-git) (4)
-- [🛡️ Agentes de Compliance](#️-agentes-de-compliance) (5)
-- [🟡 Agentes de Produto](#-agentes-de-produto) (3)
-- [⚙️ Como Escolher o Agente Certo](#️-como-escolher-o-agente-certo)
+## 📋 Índice de Specialists
+
+- [🔵 Specialists de Desenvolvimento](#-specialists-de-desenvolvimento) (16)
+- [🔷 Specialists de Testes](#-specialists-de-testes) (2)
+- [🟢 Specialists de Review](#-specialists-de-review) (2)
+- [🟣 Specialists de Pesquisa](#-specialists-de-pesquisa) (1)
+- [🔴 Specialists Meta](#-specialists-meta) (4)
+- [🌲 Specialists Git](#-specialists-git) (4)
+- [🛡️ Specialists de Compliance](#️-specialists-de-compliance) (5)
+- [🟡 Specialists de Produto](#-specialists-de-produto) (3)
+- [⚙️ Como Escolher o Specialist Certo](#️-como-escolher-o-specialist-certo)
 
 ---
 
-## 🔵 Agentes de Desenvolvimento
+## 🔵 Specialists de Desenvolvimento
 
 ### **python-developer**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Blue
+**Prioridade**: Alta
 
 **Especialidades**: Python idiomático, AI/ML, backend, performance, type hints
 
@@ -46,20 +55,20 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Projetos de Machine Learning
 -  Scripts e automações Python
 
-**Ferramentas disponíveis**: `read_file`, `write`, `search_replace`, `MultiEdit`, `run_terminal_cmd`, `read_lints`, `todo_write`, `codebase_search`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `terminal`, `diagnostics`, `grep`
 
 > 📚 **Referência Completa**: Veja todas as ferramentas em detalhes em [tools-reference.md](tools-reference.md)
 
 **Exemplo de uso**:
 ```bash
 # Para desenvolver API Python
-@python-developer "Implementar endpoint de autenticação com JWT"
+spawn_agent → python-developer: "Implementar endpoint de autenticação com JWT"
 
 # Para análise de dados
-@python-developer "Criar pipeline de análise para dados de vendas"
+spawn_agent → python-developer: "Criar pipeline de análise para dados de vendas"
 
 # Para otimização
-@python-developer "Otimizar consultas do banco de dados na função get_users"
+spawn_agent → python-developer: "Otimizar consultas do banco de dados na função get_users"
 ```
 
 **Principais recursos**:
@@ -71,7 +80,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 - 📦 Gerenciamento com `uv` (package manager moderno)
 
 ### **react-developer**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Blue
+**Prioridade**: Alta
 
 **Especialidades**: React moderno, shadcn/ui, TypeScript, acessibilidade, performance
 
@@ -90,7 +99,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 - 🧪 Testing com React Testing Library
 
 ### **clickup-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Orange
+**Prioridade**: Alta
 
 **Especialidades**: ClickUp MCP técnico, automações avançadas, performance, workflows
 
@@ -101,18 +110,18 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Configurações avançadas (webhooks, custom fields)
 -  Time tracking e análise de produtividade
 
-**Ferramentas disponíveis**: `read_file`, `write`, `MultiEdit`, `run_terminal_cmd`, `codebase_search`, `web_search`, **todas as 15+ ferramentas ClickUp MCP** (bulk operations, webhooks, time tracking, etc.)
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `terminal`, `grep`, `search_web`, **todas as 15+ ferramentas ClickUp MCP** (bulk operations, webhooks, time tracking, etc.)
 
 **Exemplo de uso**:
 ```bash
 # Para automações de workflow
-@clickup-specialist "Configurar automação: task 'in progress' → start time tracking + add tag 'development'"
+spawn_agent → clickup-specialist: "Configurar automação: task 'in progress' → start time tracking + add tag 'development'"
 
 # Para operações em bulk
-@clickup-specialist "Criar 20 tasks de feature seguindo template padrão com bulk operations"
+spawn_agent → clickup-specialist: "Criar 20 tasks de feature seguindo template padrão com bulk operations"
 
 # Para configurações avançadas
-@clickup-specialist "Setup webhook para sync status ClickUp → GitHub quando PR é criado"
+spawn_agent → clickup-specialist: "Setup webhook para sync status ClickUp → GitHub quando PR é criado"
 ```
 
 **Principais recursos**:
@@ -129,10 +138,10 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 
 ---
 
-## 🔷 Agentes de Testes
+## 🔷 Specialists de Testes
 
 ### **test-engineer**
-**Modelo**: Sonnet | **Prioridade**: Média | **Cor**: Cyan
+**Prioridade**: Média
 
 **Especialidades**: Unit testing com Jest/Vitest, behavior verification, qualidade
 
@@ -142,23 +151,23 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Identificar gaps de cobertura
 -  Validar funcionalidade sem modificar implementação
 
-**Ferramentas disponíveis**: `read_file`, `write`, `MultiEdit`, `run_terminal_cmd`, `grep`, `codebase_search`, `read_lints`, `todo_write`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `terminal`, `grep`, `diagnostics`
 
 **Exemplo de uso**:
 ```bash
-@test-engineer "Criar testes para a função de validação de email"
-@test-engineer "Verificar cobertura dos endpoints de autenticação"
+spawn_agent → test-engineer: "Criar testes para a função de validação de email"
+spawn_agent → test-engineer: "Verificar cobertura dos endpoints de autenticação"
 ```
 
 **Características únicas**:
 - 🧪 Testes práticos focados em comportamento
 - 🚫 **NÃO modifica implementação** - apenas testa
-- 📊 Identifica gaps e os reporta ao agente principal
+- 📊 Identifica gaps e os reporta ao agente orquestrador que o invocou
 - ⚡ Jest/Vitest com mocks apropriados
 - 💡 Sugestões para melhorar testabilidade
 
 ### **test-planner**
-**Modelo**: Sonnet | **Prioridade**: Média | **Cor**: Cyan
+**Prioridade**: Média
 
 **Especialidades**: Planejamento de testes, análise de cobertura, estratégia de testes
 
@@ -170,10 +179,10 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 
 ---
 
-## 🟢 Agentes de Review
+## 🟢 Specialists de Review
 
 ### **code-reviewer**
-**Modelo**: Opus | **Prioridade**: Alta | **Cor**: Green
+**Prioridade**: Alta
 
 **Especialidades**: Code review, melhores práticas, detecção de bugs, manutenibilidade
 
@@ -183,12 +192,12 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Identificação de padrões problemáticos
 -  Sugestões de melhoria
 
-**Ferramentas disponíveis**: `read_file`, `codebase_search`, `grep`, `read_lints`, `MultiEdit`, `todo_write`, `run_terminal_cmd`
+**Ferramentas disponíveis**: `read_file`, `grep`, `diagnostics`, `edit_file`, `terminal`
 
 **Exemplo de uso**:
 ```bash
-@code-reviewer "Revisar implementação do sistema de cache"
-@code-reviewer "Analisar security patterns no módulo de auth"
+spawn_agent → code-reviewer: "Revisar implementação do sistema de cache"
+spawn_agent → code-reviewer: "Analisar security patterns no módulo de auth"
 ```
 
 **Prioridades de review**:
@@ -200,10 +209,10 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 
 ---
 
-## 🟣 Agentes de Pesquisa
+## 🟣 Specialists de Pesquisa
 
 ### **research-agent**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Purple
+**Prioridade**: Alta
 
 **Especialidades**: Pesquisa multi-fonte, web search, Context7, análise semântica
 
@@ -213,13 +222,13 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Análise de concorrentes
 -  Documentação de bibliotecas específicas
 
-**Ferramentas disponíveis**: `read_file`, `codebase_search`, `web_search`, `grep`, `list_dir`, `mcp_context7-mcp_resolve-library-id`, `mcp_context7-mcp_get-library-docs`, `MultiEdit`, `todo_write`
+**Ferramentas disponíveis**: `read_file`, `grep`, `search_web`, `list_directory`, `edit_file`, `fetch` + Context7 via MCP (declarado em `.zed/settings.json` → `context_servers`)
 
 **Exemplo de uso**:
 ```bash
-@research-agent "Pesquisar melhores práticas para autenticação OAuth2 em 2024"
-@research-agent "Comparar React Query vs SWR para data fetching"
-@research-agent "Encontrar documentação atualizada para biblioteca X"
+spawn_agent → research-agent: "Pesquisar melhores práticas para autenticação OAuth2 em 2024"
+spawn_agent → research-agent: "Comparar React Query vs SWR para data fetching"
+spawn_agent → research-agent: "Encontrar documentação atualizada para biblioteca X"
 ```
 
 **Metodologia única**:
@@ -230,10 +239,10 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 
 ---
 
-## 🔴 Agentes de Arquitetura
+## 🔴 Specialists de Arquitetura
 
 ### **metaspec-gate-keeper**
-**Modelo**: Opus | **Prioridade**: Alta | **Cor**: Red
+**Prioridade**: Alta
 
 **Especialidades**: Integridade arquitetural, metaspecs, design principles, validação
 
@@ -243,12 +252,12 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Garantir consistência de design
 -  Aprovação/rejeição de mudanças estruturais
 
-**Ferramentas disponíveis**: `read_file`, `codebase_search`, `grep`, `MultiEdit`, `todo_write`, `web_search`
+**Ferramentas disponíveis**: `read_file`, `grep`, `edit_file`, `search_web`
 
 **Exemplo de uso**:
 ```bash
-@metaspec-gate-keeper "Validar se nova arquitetura de microsserviços alinha com metaspecs"
-@metaspec-gate-keeper "Revisar decisão de usar GraphQL vs REST"
+spawn_agent → metaspec-gate-keeper: "Validar se nova arquitetura de microsserviços alinha com metaspecs"
+spawn_agent → metaspec-gate-keeper: "Revisar decisão de usar GraphQL vs REST"
 ```
 
 **Responsabilidades**:
@@ -260,10 +269,10 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 
 ---
 
-## 🟠 Agentes de Documentação
+## 🟠 Specialists de Documentação
 
 ### **documentation-writer**
-**Modelo**: Sonnet | **Prioridade**: Média | **Cor**: Orange
+**Prioridade**: Média
 
 **Especialidades**: Documentação técnica, análise de mudanças, sincronização docs-código
 
@@ -273,20 +282,20 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Sincronizar docs com estado atual
 -  Análise de gaps de documentação
 
-**Ferramentas disponíveis**: `read_file`, `write`, `search_replace`, `MultiEdit`, `codebase_search`, `web_search`, `grep`, `list_dir`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `grep`, `search_web`, `grep`, `list_directory`
 
 **Exemplo de uso**:
 ```bash
-@documentation-writer "Atualizar docs após mudanças na API de usuários"
-@documentation-writer "Criar guia de setup para novo desenvolvedor"
+spawn_agent → documentation-writer: "Atualizar docs após mudanças na API de usuários"
+spawn_agent → documentation-writer: "Criar guia de setup para novo desenvolvedor"
 ```
 
 ---
 
-## 🛡️ Agentes de Compliance 🆕
+## 🛡️ Specialists de Compliance 🆕
 
 ### **security-information-master**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Blue
+**Prioridade**: Alta
 
 **Especialidades**: Orquestração de compliance, detecção de frameworks, due diligence, ISO 27001, ISO 22301, PMBOK, SOC2
 
@@ -297,20 +306,20 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Preparar documentação para auditorias e certificações
 -  Consolidar outputs de frameworks diferentes
 
-**Ferramentas disponíveis**: `read_file`, `write`, `codebase_search`, `grep`, `list_dir`, `web_search`, `todo_write`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `grep`, `list_directory`, `search_web`
 
-**Agentes delegados**: `@iso-27001-specialist`, `@iso-22301-specialist`, `@pmbok-specialist`, `@soc2-specialist`
+**Specialists delegados** (via `spawn_agent`): `iso-27001-specialist`, `iso-22301-specialist`, `pmbok-specialist`, `soc2-specialist`
 
 **Exemplo de uso**:
 ```bash
 # Orquestração automática baseada em checklist
-@security-information-master "Analisar checklist Serasa e gerar documentação necessária"
+spawn_agent → security-information-master: "Analisar checklist Serasa e gerar documentação necessária"
 
 # Due diligence completo
-@security-information-master "Preparar docs para auditoria ISO 27001 + SOC2"
+spawn_agent → security-information-master: "Preparar docs para auditoria ISO 27001 + SOC2"
 
 # Análise de requisitos
-@security-information-master "Determinar quais frameworks aplicam para fintech B2B enterprise"
+spawn_agent → security-information-master: "Determinar quais frameworks aplicam para fintech B2B enterprise"
 ```
 
 **4 Modos de Operação**:
@@ -329,7 +338,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 ---
 
 ### **iso-27001-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Red
+**Prioridade**: Alta
 
 **Especialidades**: ISO/IEC 27001:2022 (ISMS), risk assessment, asset management, access control, incident response
 
@@ -340,18 +349,18 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Preparação para certificação ISO 27001
 -  Integração com SOC2 (cross-references)
 
-**Ferramentas disponíveis**: `read_file`, `write`, `search_replace`, `codebase_search`, `grep`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `grep`
 
 **Exemplo de uso**:
 ```bash
 # Documentação SGSI completa
-@iso-27001-specialist "Gerar documentação ISO 27001 com foco em fintech"
+spawn_agent → iso-27001-specialist: "Gerar documentação ISO 27001 com foco em fintech"
 
 # Risk Assessment específico
-@iso-27001-specialist "Criar Risk Assessment para APIs RESTful + database PostgreSQL"
+spawn_agent → iso-27001-specialist: "Criar Risk Assessment para APIs RESTful + database PostgreSQL"
 
 # Controles específicos
-@iso-27001-specialist "Documentar Annex A 5.15-5.18 (Access Control) com MFA + RBAC"
+spawn_agent → iso-27001-specialist: "Documentar Annex A 5.15-5.18 (Access Control) com MFA + RBAC"
 ```
 
 **5 Documentos Gerados** (`docs/compliance-context/security/`):
@@ -371,7 +380,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 ---
 
 ### **iso-22301-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Green
+**Prioridade**: Alta
 
 **Especialidades**: ISO 22301:2019 (BCMS), business continuity, disaster recovery, RTOs/RPOs, crisis management
 
@@ -382,18 +391,18 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  **Due Diligence Serasa Experian** (5 de 8 requisitos cobertos) 🔥
 -  Documentação de RTOs/RPOs por criticidade de sistema
 
-**Ferramentas disponíveis**: `read_file`, `write`, `search_replace`, `codebase_search`, `grep`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `grep`
 
 **Exemplo de uso**:
 ```bash
 # BC/DR completo
-@iso-22301-specialist "Gerar BCP + DRP para infraestrutura AWS Multi-AZ"
+spawn_agent → iso-22301-specialist: "Gerar BCP + DRP para infraestrutura AWS Multi-AZ"
 
 # Due Diligence Serasa
-@iso-22301-specialist "Documentar 5 requisitos Serasa: BCP, DRP, Crisis, Testing, RTOs/RPOs"
+spawn_agent → iso-22301-specialist: "Documentar 5 requisitos Serasa: BCP, DRP, Crisis, Testing, RTOs/RPOs"
 
 # Testes de resiliência
-@iso-22301-specialist "Documentar DR Drill 2024 com RTO 30min alcançado"
+spawn_agent → iso-22301-specialist: "Documentar DR Drill 2024 com RTO 30min alcançado"
 ```
 
 **5 Documentos Gerados** (`docs/compliance-context/business-continuity/`):
@@ -413,7 +422,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 ---
 
 ### **pmbok-specialist**
-**Modelo**: Sonnet | **Prioridade**: Média | **Cor**: Yellow
+**Prioridade**: Média
 
 **Especialidades**: PMBOK Guide 7th Edition, project governance, change management, quality management
 
@@ -424,18 +433,18 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Integração com NX monorepo (governança técnica)
 -  Evidências de workshops e treinamentos
 
-**Ferramentas disponíveis**: `read_file`, `write`, `search_replace`, `codebase_search`, `grep`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `grep`
 
 **Exemplo de uso**:
 ```bash
 # Governança completa
-@pmbok-specialist "Gerar framework de governança PMBOK 7th para NX monorepo"
+spawn_agent → pmbok-specialist: "Gerar framework de governança PMBOK 7th para NX monorepo"
 
 # Change Management
-@pmbok-specialist "Documentar processo de Change Request com CI/CD + Feature Flags"
+spawn_agent → pmbok-specialist: "Documentar processo de Change Request com CI/CD + Feature Flags"
 
 # Quality Gates
-@pmbok-specialist "Criar Quality Management com DoD, Code Review e métricas DORA"
+spawn_agent → pmbok-specialist: "Criar Quality Management com DoD, Code Review e métricas DORA"
 ```
 
 **5 Documentos Gerados** (`docs/compliance-context/project-management/`):
@@ -455,7 +464,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 ---
 
 ### **soc2-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Purple
+**Prioridade**: Alta
 
 **Especialidades**: SOC2 Type II (AICPA), Trust Services Criteria, evidence collection, continuous monitoring
 
@@ -466,18 +475,18 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Estratégia de coleta de evidências (12 meses)
 -  Integração com ISO 27001 (~70% overlap)
 
-**Ferramentas disponíveis**: `read_file`, `write`, `search_replace`, `codebase_search`, `grep`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `grep`
 
 **Exemplo de uso**:
 ```bash
 # SOC2 Type II completo
-@soc2-specialist "Preparar documentação SOC2 Type II para fintech SaaS"
+spawn_agent → soc2-specialist: "Preparar documentação SOC2 Type II para fintech SaaS"
 
 # Due Diligence Serasa
-@soc2-specialist "Documentar 3 requisitos Serasa: Relatório SOC2 + SLAs + Contratos"
+spawn_agent → soc2-specialist: "Documentar 3 requisitos Serasa: Relatório SOC2 + SLAs + Contratos"
 
 # Evidence Collection
-@soc2-specialist "Criar estratégia de evidências para 12 meses de audit period"
+spawn_agent → soc2-specialist: "Criar estratégia de evidências para 12 meses de audit period"
 ```
 
 **5 Documentos Gerados** (`docs/compliance-context/soc2/`):
@@ -499,23 +508,23 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 **Mapeamento Serasa Experian** (8 requisitos totais):
 | Requisito | Framework | Specialist | Documento |
 |-----------|-----------|------------|-----------|
-| #1: BCP | ISO 22301 | `@iso-22301-specialist` | business-continuity-plan.md ✅ |
-| #2: DRP | ISO 22301 | `@iso-22301-specialist` | disaster-recovery-plan.md ✅ |
-| #3: Crisis Mgmt | ISO 22301 | `@iso-22301-specialist` | crisis-management.md ✅ |
-| #4: Testes BC/DR | ISO 22301 | `@iso-22301-specialist` | resilience-testing.md ✅ |
-| #5: RTOs/RPOs | ISO 22301 | `@iso-22301-specialist` | recovery-objectives.md ✅ |
-| #6: SOC2 Report | SOC2 | `@soc2-specialist` | trust-services-criteria.md ✅ |
-| #7: SLAs | SOC2 | `@soc2-specialist` | availability-controls.md ✅ |
-| #8: Docs SLAs | SOC2 | `@soc2-specialist` | availability-controls.md ✅ |
+| #1: BCP | ISO 22301 | `iso-22301-specialist` | business-continuity-plan.md ✅ |
+| #2: DRP | ISO 22301 | `iso-22301-specialist` | disaster-recovery-plan.md ✅ |
+| #3: Crisis Mgmt | ISO 22301 | `iso-22301-specialist` | crisis-management.md ✅ |
+| #4: Testes BC/DR | ISO 22301 | `iso-22301-specialist` | resilience-testing.md ✅ |
+| #5: RTOs/RPOs | ISO 22301 | `iso-22301-specialist` | recovery-objectives.md ✅ |
+| #6: SOC2 Report | SOC2 | `soc2-specialist` | trust-services-criteria.md ✅ |
+| #7: SLAs | SOC2 | `soc2-specialist` | availability-controls.md ✅ |
+| #8: Docs SLAs | SOC2 | `soc2-specialist` | availability-controls.md ✅ |
 
 **Status**: ✅ 8/8 requisitos cobertos (100%)
 
 ---
 
-## 🟡 Agentes de Produto
+## 🟡 Specialists de Produto
 
 ### **product-agent**
-**Modelo**: Opus | **Prioridade**: Alta | **Cor**: Yellow
+**Prioridade**: Alta
 
 **Especialidades**: Gestão de produto, ClickUp integration, estratégia, coordenação
 
@@ -525,7 +534,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Análise de requisitos
 -  Gestão de roadmap
 
-**Ferramentas disponíveis**: `read_file`, `write`, `codebase_search`, `web_search`, `todo_write`, `mcp_clickup-mcp-server_create_task`, `mcp_clickup-mcp-server_update_task`, `mcp_clickup-mcp-server_get_task`, `mcp_clickup-mcp-server_create_task_comment`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `grep`, `search_web` + ferramentas ClickUp via MCP (`create_task`, `update_task`, `get_task`, `create_task_comment`) declaradas em `.zed/settings.json` → `context_servers`
 
 **Integração ClickUp**:
 -  Cria tasks estruturadas
@@ -534,7 +543,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Gerencia tags e prioridades
 
 ### **clickup-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Orange
+**Prioridade**: Alta
 
 **Especialidades**: ClickUp MCP técnico, automações avançadas, performance, workflows
 
@@ -544,20 +553,20 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Performance optimization (batching, caching, query optimization)
 -  Configurações avançadas (webhooks, custom fields, templates)
 -  Time tracking automation e análise de produtividade
--  Integração com comandos `/engineer/*` para automação
+-  Integração com skills `/onion-engineer-*` para automação
 
-**Ferramentas disponíveis**: `read_file`, `write`, `MultiEdit`, `run_terminal_cmd`, `codebase_search`, `web_search`, **todas as 15+ ferramentas ClickUp MCP**
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `terminal`, `grep`, `search_web`, **todas as 15+ ferramentas ClickUp MCP**
 
 **Exemplo de uso**:
 ```bash
 # Automações de workflow
-@clickup-specialist "Configurar automação: task 'in progress' → start time tracking + add tag 'development'"
+spawn_agent → clickup-specialist: "Configurar automação: task 'in progress' → start time tracking + add tag 'development'"
 
 # Operações em bulk
-@clickup-specialist "Criar 20 tasks em lote com template feature e assignees automáticos"
+spawn_agent → clickup-specialist: "Criar 20 tasks em lote com template feature e assignees automáticos"
 
 # Performance optimization  
-@clickup-specialist "Otimizar queries ClickUp usando filtros server-side e batching"
+spawn_agent → clickup-specialist: "Otimizar queries ClickUp usando filtros server-side e batching"
 ```
 
 **Características únicas**:
@@ -567,42 +576,44 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 - 📊 **15+ ferramentas ClickUp MCP**: Cobertura completa da API ClickUp
 - 🎯 **7 especialidades técnicas**: workflow-automation, performance-optimization, webhooks
 
-### **claude-code-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Light Blue
+### **zed-specialist**
+**Prioridade**: Alta
 
-**Especialidades**: Otimização Claude Code, configuração workspace, troubleshooting, produtividade
+> **Nota:** este specialist substitui o antigo `claude-code-specialist` no port nativo Zed (ADR 0001).
+
+**Especialidades**: Otimização do Zed, configuração de workspace (`.zed/settings.json`), `agent.tool_permissions`, `context_servers` (MCP), troubleshooting, produtividade
 
 **Quando usar**:
--  Resolver problemas de performance do Claude Code
--  Configurar ambiente para novos projetos
--  Otimizar settings para workflows específicos
--  Troubleshoot extension conflicts ou API connectivity
--  Criar `CLAUDE.md` e `.claudeignore` templates
--  Setup automation para comandos `/engineer/*`
+-  Resolver problemas de performance do Zed
+-  Configurar ambiente para novos projetos (worktree trust, providers de LLM)
+-  Otimizar `agent.tool_permissions` para workflows específicos
+-  Declarar/depurar `context_servers` (MCPs) em `.zed/settings.json`
+-  Criar `AGENTS.md` e ajustar `.zed/settings.json`
+-  Setup automation para as skills `/onion-engineer-*`
 
-**Ferramentas disponíveis**: `read_file`, `write`, `MultiEdit`, `run_terminal_cmd`, `codebase_search`, `list_dir`, `glob_file_search`, `web_search`, `read_lints`, `todo_write`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `terminal`, `grep`, `list_directory`, `find_path`, `search_web`, `diagnostics`
 
 **Exemplo de uso**:
 ```bash
 # Configuração de projeto novo
-@claude-code-specialist "Setup otimizado para projeto React TypeScript com foco em AI development"
+spawn_agent → zed-specialist: "Setup otimizado do Zed para projeto React TypeScript com foco em AI development"
 
 # Troubleshooting
-@claude-code-specialist "Resolver erro 'HTTP/2 blocked by proxy' e otimizar connectivity"
+spawn_agent → zed-specialist: "Skills locais não aparecem no Agent Panel — verificar worktree trust e .agents/skills/"
 
-# Performance Issues
-@claude-code-specialist "Claude Code está lento, analisar memory usage e otimizar configurations"
+# context_servers
+spawn_agent → zed-specialist: "Declarar o ClickUp MCP como context_server em .zed/settings.json"
 ```
 
 **Características únicas**:
-- 🎯 **7 especialidades técnicas**: configuration, workspace, extensions, API, performance, productivity, troubleshooting
-- 🚀 **Integração automática**: Chamado automaticamente por outros agentes quando há problemas de IDE
-- 🔧 **Criação de artefatos**: `CLAUDE.md`, `.claudeignore`, workspace settings otimizados
-- ⚡ **Performance focus**: Memory optimization, startup time, context caching
-- 🔗 **Delegation automática**: Integração com comandos `/engineer/*` para setup de ambiente
+- 🎯 **Especialidades Zed**: settings, workspace, worktree trust, providers de LLM, context_servers, tool_permissions
+- 🚀 **Integração automática**: delegado por outras skills/specialists quando há problemas de IDE
+- 🔧 **Criação de artefatos**: `AGENTS.md`, `.zed/settings.json` otimizados
+- ⚡ **Performance focus**: startup time, context, descoberta de skills
+- 🔗 **Delegação automática**: integração com as skills `/onion-engineer-*` para setup de ambiente
 
 ### **gitflow-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Light Green
+**Prioridade**: Alta
 
 **Especialidades**: GitFlow workflows, branch management, release processes, team collaboration, semantic versioning
 
@@ -616,21 +627,21 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Onboarding de equipes em GitFlow
 -  Otimização de workflows colaborativos
 
-**Ferramentas disponíveis**: `read_file`, `write`, `MultiEdit`, `run_terminal_cmd`, `codebase_search`, `grep`, `web_search`, `todo_write`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `terminal`, `grep`, `search_web`
 
 **Exemplo de uso**:
 ```bash
 # Para setup inicial
-@gitflow-specialist "Configurar GitFlow em repositório novo com detecção automática master/main"
+spawn_agent → gitflow-specialist: "Configurar GitFlow em repositório novo com detecção automática master/main"
 
 # Para workflows
-@gitflow-specialist "Orientar equipe no processo de release v2.1.0 com semantic versioning"
+spawn_agent → gitflow-specialist: "Orientar equipe no processo de release v2.1.0 com semantic versioning"
 
 # Para emergências
-@gitflow-specialist "Hotfix crítico em produção - orientar processo completo"
+spawn_agent → gitflow-specialist: "Hotfix crítico em produção - orientar processo completo"
 
 # Para migração
-@gitflow-specialist "Migrar repositório de master para main mantendo GitFlow ativo"
+spawn_agent → gitflow-specialist: "Migrar repositório de master para main mantendo GitFlow ativo"
 ```
 
 **Características únicas**:
@@ -640,10 +651,10 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 - 🧠 **Semantic versioning**: Conventional commits + análise automática de versioning
 - 👥 **Team enablement**: Onboarding em 3 níveis (iniciante, intermediário, avançado)
 - 📊 **Analytics integration**: Métricas de equipe e health checks
-- 🔗 **Complementaridade**: Integração perfeita com @mermaid-specialist (workflows vs diagramas)
+- 🔗 **Complementaridade**: Integração perfeita com o specialist `mermaid-specialist` (workflows vs diagramas)
 
 ### **nodejs-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Teal
+**Prioridade**: Alta
 
 **Especialidades**: Backend JavaScript/TypeScript, Node.js runtime, PNPM ecosystem, performance optimization
 
@@ -656,18 +667,18 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Testing strategies (Jest/Vitest, integration, E2E)
 -  Microserviços e arquiteturas escaláveis
 
-**Ferramentas disponíveis**: `read_file`, `write`, `MultiEdit`, `run_terminal_cmd`, `codebase_search`, `read_lints`, `todo_write`, `web_search`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `terminal`, `grep`, `diagnostics`, `search_web`
 
 **Exemplo de uso**:
 ```bash
 # Para APIs performantes
-@nodejs-specialist "Criar API Fastify com autenticação JWT, rate limiting e TypeScript strict"
+spawn_agent → nodejs-specialist: "Criar API Fastify com autenticação JWT, rate limiting e TypeScript strict"
 
 # Para otimização de performance  
-@nodejs-specialist "API com latência >500ms - analisar bottlenecks e otimizar com profiling"
+spawn_agent → nodejs-specialist: "API com latência >500ms - analisar bottlenecks e otimizar com profiling"
 
 # Para configuração PNPM
-@nodejs-specialist "Migrar projeto de NPM para PNPM com workspace configuration"
+spawn_agent → nodejs-specialist: "Migrar projeto de NPM para PNPM com workspace configuration"
 ```
 
 **Características únicas**:
@@ -680,7 +691,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 - 🏗️ **Architecture patterns**: Layered design, dependency injection, microservices
 
 ### **gitflow-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Light Green
+**Prioridade**: Alta
 
 **Especialidades**: GitFlow workflows, branch management, release processes, team collaboration, semantic versioning
 
@@ -694,21 +705,21 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Onboarding de equipes em GitFlow
 -  Otimização de workflows colaborativos
 
-**Ferramentas disponíveis**: `read_file`, `write`, `MultiEdit`, `run_terminal_cmd`, `codebase_search`, `grep`, `web_search`, `todo_write`
+**Ferramentas disponíveis**: `read_file`, `write_file`, `edit_file`, `terminal`, `grep`, `search_web`
 
 **Exemplo de uso**:
 ```bash
 # Para setup inicial
-@gitflow-specialist "Configurar GitFlow em repositório novo com detecção automática master/main"
+spawn_agent → gitflow-specialist: "Configurar GitFlow em repositório novo com detecção automática master/main"
 
 # Para workflows
-@gitflow-specialist "Orientar equipe no processo de release v2.1.0 com semantic versioning"
+spawn_agent → gitflow-specialist: "Orientar equipe no processo de release v2.1.0 com semantic versioning"
 
 # Para emergências
-@gitflow-specialist "Hotfix crítico em produção - orientar processo completo"
+spawn_agent → gitflow-specialist: "Hotfix crítico em produção - orientar processo completo"
 
 # Para migração
-@gitflow-specialist "Migrar repositório de master para main mantendo GitFlow ativo"
+spawn_agent → gitflow-specialist: "Migrar repositório de master para main mantendo GitFlow ativo"
 ```
 
 **Características únicas**:
@@ -718,116 +729,99 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 - 🧠 **Semantic versioning**: Conventional commits + análise automática de versioning
 - 👥 **Team enablement**: Onboarding em 3 níveis (iniciante, intermediário, avançado)
 - 📊 **Analytics integration**: Métricas de equipe e health checks
-- 🔗 **Complementaridade**: Integração perfeita com @mermaid-specialist (workflows vs diagramas)
+- 🔗 **Complementaridade**: Integração perfeita com o specialist `mermaid-specialist` (workflows vs diagramas)
 
 ---
 
-## ⚙️ Como Escolher o Agente Certo
+## ⚙️ Como Escolher o Specialist Certo
 
 ### **Por Tipo de Tarefa**
 
 #### **🔧 Desenvolvimento**
 ```bash
 # Python backend
-@python-developer "implementar API REST"
+spawn_agent → python-developer: "implementar API REST"
 
 # Frontend React
-@react-developer "criar componente de dashboard"
+spawn_agent → react-developer: "criar componente de dashboard"
 
 # Full-stack (coordenação automática)
-/engineer/work "sistema completo de notificações"
+/onion-engineer-work "sistema completo de notificações"
 ```
 
 #### **🧪 Testes**
 ```bash
 # Testes específicos
-@test-engineer "testar função de validação de CPF"
+spawn_agent → test-engineer: "testar função de validação de CPF"
 
 # Estratégia de testes
-@test-planner "planejar cobertura de testes para módulo auth"
+spawn_agent → test-planner: "planejar cobertura de testes para módulo auth"
 ```
 
 #### **🔍 Review**
 ```bash
 # Code review geral
-@code-reviewer "revisar implementação de cache Redis"
+spawn_agent → code-reviewer: "revisar implementação de cache Redis"
 
 # Validação arquitetural  
-@metaspec-gate-keeper "validar uso de microservices"
+spawn_agent → metaspec-gate-keeper: "validar uso de microservices"
 ```
 
 #### **📚 Pesquisa & Docs**
 ```bash
 # Pesquisa tecnológica
-@research-agent "comparar Next.js vs Remix para SSR"
+spawn_agent → research-agent: "comparar Next.js vs Remix para SSR"
 
 # Documentação
-@documentation-writer "atualizar docs da API v2"
+spawn_agent → documentation-writer: "atualizar docs da API v2"
 ```
 
 #### **📋 Produto**
 ```bash
 # Gestão de produto
-@product-agent "refinar requisitos da feature de chat"
+spawn_agent → product-agent: "refinar requisitos da feature de chat"
 ```
 
 ### **Por Complexidade**
 
-#### **🟢 Tarefa Simples** (1 agente)
+#### **🟢 Tarefa Simples** (1 specialist)
 ```bash
-@test-engineer "adicionar testes para função validateEmail"
+spawn_agent → test-engineer: "adicionar testes para função validateEmail"
 ```
 
-#### **🟡 Tarefa Média** (2-3 agentes sequenciais)
+#### **🟡 Tarefa Média** (2-3 specialists sequenciais)
 ```bash
 # Sequência típica:
-@research-agent "pesquisar padrões OAuth2" 
-→ @python-developer "implementar OAuth2"
-→ @test-engineer "testar fluxo OAuth2"
+spawn_agent → research-agent: "pesquisar padrões OAuth2" 
+→ spawn_agent → python-developer: "implementar OAuth2"
+→ spawn_agent → test-engineer: "testar fluxo OAuth2"
 ```
 
-#### **🔴 Tarefa Complexa** (múltiplos agentes paralelos)
+#### **🔴 Tarefa Complexa** (múltiplos specialists paralelos)
 ```bash
-/engineer/work "sistema completo de e-commerce"
-# → Coordenação automática de múltiplos agentes
+/onion-engineer-work "sistema completo de e-commerce"
+# → A skill orquestra múltiplos specialists via spawn_agent
 ```
 
-### **Por Prioridade do Modelo**
+> **Nota sobre modelo (Zed):** no Zed o modelo é definido **globalmente** no Agent Panel — não há `model:` por specialist. A escolha de um modelo mais capaz (ex.: Opus) para tarefas complexas (review arquitetural, coordenação) é uma configuração do workspace, não do arquivo da persona.
 
-#### **🚀 Sonnet (Eficiência)**
-- `python-developer`, `react-developer`, `test-engineer`, `research-agent`
--  Tarefas de implementação diretas
--  Testes e validações
--  Pesquisa e documentação
+### **Padrões de Delegação**
 
-#### **🎯 Opus (Análise Complexa)**
-- `code-reviewer`, `metaspec-gate-keeper`, `product-agent`
--  Decisões arquiteturais críticas
--  Reviews complexos
--  Coordenação de produto
+A orquestração escolhe o specialist conforme o contexto da tarefa. Exemplo de raciocínio (não é código executável):
 
-### **Padrões de Delegação Automática**
-
-O sistema escolhe agentes automaticamente baseado em:
-
-#### **Análise de Contexto**
-```python
-# Exemplo interno (não visível ao usuário)
-if task.contains("test") or task.contains("spec"):
-    delegate_to("test-engineer")
-elif task.contains("react") or task.contains("frontend"):  
-    delegate_to("react-developer")
-elif task.contains("review") or task.contains("quality"):
-    delegate_to("code-reviewer")
+```text
+se a tarefa fala em "test"/"spec"      → spawn_agent → test-engineer
+se fala em "react"/"frontend"          → spawn_agent → react-developer
+se fala em "review"/"quality"          → spawn_agent → code-reviewer
 ```
 
-#### **Coordenação Multi-Agente**
+#### **Coordenação Multi-Specialist**
 ```mermaid
 graph TD
     A[Task Complexa] --> B[Análise de Requisitos]
     B --> C{Múltiplos Domínios?}
     C -->|Sim| D[Coordenador Principal]
-    C -->|Não| E[Agente Especializado]
+    C -->|Não| E[Specialist Especializado]
     D --> F[python-developer]
     D --> G[react-developer]  
     D --> H[test-engineer]
@@ -839,10 +833,10 @@ graph TD
 
 ---
 
-## 📊 Métricas dos Agentes
+## 📊 Métricas dos Specialists
 
-### **Performance por Agente**
-| Agente | Tempo Médio | Taxa Sucesso | Uso Frequente |
+### **Performance por Specialist**
+| Specialist | Tempo Médio | Taxa Sucesso | Uso Frequente |
 |---------|-------------|--------------|---------------|
 | `python-developer` | 45min | 94% | 35% |
 | `react-developer` | 52min | 91% | 28% |
@@ -877,8 +871,8 @@ graph TD
 ## 💡 Melhores Práticas
 
 ### **Para Máxima Eficiência**
-1. ✅ **Use agentes específicos** para tarefas claras
-2. ✅ **Deixe o sistema coordenar** tarefas complexas
+1. ✅ **Use specialists específicos** para tarefas claras
+2. ✅ **Deixe a skill orquestradora coordenar** tarefas complexas
 3. ✅ **Combine sequencialmente** para workflows
 4. ✅ **Monitore resultados** para ajustar delegação
 

@@ -1,17 +1,17 @@
 ---
-title: Meta-spec — Padrões de Código e Idioma do Sistema Onion
-date: 2026-05-18
-version: 1.0.0
+title: Meta-spec — Padrões de Código e Idioma do Sistema Onion (nativo Zed)
+date: 2026-06-03
+version: 2.0.0
 level: L0
 status: active
-gate-keeper: "@metaspec-gate-keeper"
+gate-keeper: "specialists/metaspec-gate-keeper.md"
 ---
 
-# Meta-spec — Padrões de Código e Idioma do Sistema Onion
+# Meta-spec — Padrões de Código e Idioma do Sistema Onion (nativo Zed)
 
 ## Propósito
 
-Define padrões de **idioma**, **formatação** e **convenções textuais** aplicáveis a todos os artefatos do Sistema Onion. Esta spec consolida diretrizes que estavam dispersas em CLAUDE.md, READMEs e mensagens informais.
+Define padrões de **idioma**, **formatação**, **convenções textuais** e **nomenclatura de artefatos Zed** aplicáveis a todos os componentes do Sistema Onion. No port nativo Zed ([ADR 0001](./adr/0001-zed-native-port.md)), consolida diretrizes que estavam em CLAUDE.md (hoje `AGENTS.md`), READMEs e mensagens informais.
 
 Aplica-se ao **Sistema Onion**, não ao projeto-alvo onde o Onion é instalado.
 
@@ -19,8 +19,9 @@ Referências relacionadas:
 
 - [agents.md](./agents.md), [commands.md](./commands.md)
 - [architecture.md](./architecture.md), [integrations.md](./integrations.md)
+- [adr/0001-zed-native-port.md](./adr/0001-zed-native-port.md) — régua do port
 
-Skill que automatiza aplicação: `.claude/skills/language-standards/` (quando ativa).
+Skill que automatiza aplicação: `.agents/skills/language-standards/`.
 
 ---
 
@@ -29,69 +30,107 @@ Skill que automatiza aplicação: `.claude/skills/language-standards/` (quando a
 | Onde | Idioma | Exemplos |
 |---|---|---|
 | Comentários de código | **pt-BR** | `// calcula valor total com desconto` |
-| Documentação Markdown | **pt-BR** | READMEs, KBs, meta-specs, guias, análises |
-| Mensagens ao usuário (UI/CLI) | **pt-BR** | Confirmações, prompts, erros voltados ao usuário |
-| Respostas do assistente IA | **pt-BR** | Conversas no chat com o operador |
+| Documentação Markdown | **pt-BR** | READMEs, KBs, meta-specs, guias, análises, ADRs |
+| Mensagens ao usuário | **pt-BR** | Confirmações, prompts, erros voltados ao usuário |
+| Respostas do assistente IA | **pt-BR** | Conversas no chat do Zed com o operador |
 | Código (variáveis, funções, classes, módulos) | **inglês** | `calculateTotalWithDiscount()`, `class TaskAdapter` |
 | Nomes de arquivos | **inglês** | `task-manager-abstraction.md`, `react-developer.md` |
-| Commits e branches | **inglês** | `feat: add jira adapter retry logic`, `chore/onion-saneamento` |
+| Nomes de skills e specialists | **inglês** | `onion-engineer-start`, `clickup-specialist` |
+| Commits e branches | **inglês** | `feat: add jira adapter retry logic`, `feature/jira-bulk` |
 | Logs e debugging | **inglês** | `Error: provider not configured` |
-| YAML frontmatter (campos) | **inglês** | `name:`, `description:`, `tools:` |
-| YAML frontmatter (valores narrativos) | pt-BR aceito | `description: "Especialista em..."` |
+| Frontmatter (campos) | **inglês** | `name:`, `description:` |
+| Frontmatter (valores narrativos) | pt-BR aceito | `description: "Gestão estratégica..."` |
 
 ### 1.1 Justificativa
 
-- pt-BR em camadas de documentação e UX mantém o framework acessível ao mantenedor e leitores nativos
-- Inglês em camadas técnicas garante interoperabilidade com ferramentas (git, linters, sistemas de busca)
-- Misturar idiomas dentro da mesma camada é proibido (não escrever metade do README em pt-BR e metade em inglês)
+- pt-BR em documentação e UX mantém o framework acessível ao mantenedor e leitores nativos
+- Inglês em camadas técnicas garante interoperabilidade com ferramentas (git, linters, busca)
+- Misturar idiomas dentro da mesma camada é proibido
 
 ### 1.2 Exceções aceitas
 
-- Citações diretas de fontes externas podem manter idioma original (geralmente inglês)
-- Termos técnicos sem tradução consolidada (ex: "Pull Request", "feature flag", "commit") podem ser usados em pt-BR
-- Nomes próprios de tecnologias mantêm grafia oficial (Claude Code, GitHub, Jira)
+- Citações diretas de fontes externas podem manter idioma original
+- Termos técnicos sem tradução consolidada (ex: "Pull Request", "feature flag", "commit", "skill", "specialist")
+- Nomes próprios de tecnologias mantêm grafia oficial (Zed, GitHub, Jira, ClickUp)
 
 ---
 
-## 2. Formatação Markdown
+## 2. Tool names nativas do Zed (snake_case)
 
-### 2.1 Headers
+Skills e specialists referenciam tools pelo nome **nativo Zed em snake_case** — não pelos nomes do Claude Code (`Bash`, `Read`, `Edit`, `Glob`):
 
-- `# H1` — apenas para o título do documento (um por arquivo)
-- `## H2` — seções principais
-- `### H3` — subseções
-- `#### H4` — uso esparso, preferir listas
-
-### 2.2 Listas
-
-- Hífen (`-`) para listas não ordenadas
-- Números (`1.`, `2.`) para listas ordenadas com sequência relevante
-- Recuo de 2 espaços para sub-itens
-
-### 2.3 Tabelas
-
-Usar quando comparativo ou tabular é mais legível que prosa:
-
-```markdown
-| Coluna 1 | Coluna 2 |
+| Tool Zed (snake_case) | Função |
 |---|---|
-| valor | valor |
-```
+| `read_file` | Ler arquivo |
+| `write_file` | Criar/sobrescrever arquivo |
+| `edit_file` | Edição cirúrgica |
+| `terminal` | Executar comando de shell |
+| `grep` | Busca por conteúdo |
+| `find_path` | Busca por caminho/glob |
+| `list_directory` | Listar diretório |
+| `fetch` | HTTP (ex: Jira REST) |
+| `diagnostics` | Diagnósticos do projeto |
+| `spawn_agent` | Delegar a um specialist |
+| `search_web` | Busca na web |
 
-### 2.4 Blocos de código
+> **Mudou do legado:** `Bash` → `terminal`; `Read` → `read_file`; `Edit` → `edit_file`; `Write` → `write_file`; `Glob` → `find_path`; `Grep` → `grep`. Não usar `allowed-tools` em frontmatter (campo inexistente no Zed).
 
-- Triple backticks com linguagem declarada (` ```yaml `, ` ```bash `, ` ```typescript `)
-- Para diagramas: ` ```mermaid `
+---
 
-### 2.5 Links
+## 3. Nomenclatura de artefatos
 
-- Markdown nativo `[label](path)` para links internos
-- Sempre paths relativos (não absolutos)
-- Linkar para arquivos específicos quando possível, não para pastas
+### 3.1 Skills
 
-### 2.6 Frontmatter
+- Pasta + `name`: `onion-<categoria>-<comando>` (lowercase + hífen, ≤ 64 chars)
+- Core skills sem prefixo: `onion`, `onion-warmup`, `onion-patterns`, `onion-validation`, `language-standards`
+- Filha **direta** de `.agents/skills/` (catálogo flat, sem subpasta)
+- Invocação: `/onion-<categoria>-<comando>` ou `@<skill>`
 
-YAML válido entre `---` no início do arquivo. Campos comuns:
+### 3.2 Specialists
+
+- Arquivo `.agents/onion/specialists/<slug>.md`, slug kebab-case (`jira-specialist`, `react-developer`)
+- Frontmatter mínimo: `name` + `description`
+- Delegação: `spawn_agent` + caminho da persona (não `@<slug>`)
+
+### 3.3 Filenames gerais
+
+- **kebab-case** para tudo em `.agents/` e `docs/`
+- Não usar espaços, underscores ou PascalCase
+- `.md` para documentos; `.json` para configs (`.zed/settings.json`); `.yml` apenas em workflows CI
+
+### 3.4 Feature slugs (sessions e branches)
+
+- **kebab-case obrigatório** — branch e pasta de sessão (`.agents/onion/sessions/<slug>/`) usam o mesmo slug
+- Underscore quebra GitFlow: `user-authentication` ✅; `user_auth` ❌
+
+### 3.5 Branches Git
+
+- GitFlow: `feature/<nome>`, `hotfix/<nome>`, `release/<versao>`
+- Chores: `chore/<descricao>`
+
+### 3.6 Commits
+
+- Conventional Commits em inglês: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`
+- Mensagem em pt-BR conforme `AGENTS.md`, com tipo em inglês
+- Referenciar issue/ID de task quando aplicável
+
+---
+
+## 4. Formatação Markdown
+
+### 4.1 Headers e listas
+
+- `# H1` apenas para título (um por arquivo); `## H2` seções; `### H3` subseções
+- Não pular níveis (H2 → H3 → H4)
+- Hífen (`-`) para listas não ordenadas; números para sequência relevante; recuo de 2 espaços
+
+### 4.2 Tabelas, código e links
+
+- Tabelas quando comparativo/tabular é mais legível que prosa
+- Blocos de código com linguagem declarada (` ```yaml `, ` ```bash `, ` ```mermaid `)
+- Links Markdown nativo `[label](path)`, sempre **paths relativos**
+
+### 4.3 Frontmatter de docs
 
 ```yaml
 ---
@@ -104,141 +143,73 @@ status: <active | historical | draft>
 
 ---
 
-## 3. Convenções de naming
+## 5. Estilo de escrita
 
-### 3.1 Filenames
+- **Documentação técnica**: direto, factual
+- **Análises críticas / ADRs**: crítico mas construtivo
+- **Mensagens ao usuário**: claro e empático
+- **Comentários em código**: explicar **por quê**, não o **quê**
 
-- **kebab-case** para tudo em `.claude/` e `docs/` (`task-manager-abstraction.md`)
-- Sufixos descritivos quando útil (`-2025`, `-v4`, `-historical`)
-- Não usar espaços, underscores ou PascalCase
-- Extensão `.md` para documentos, `.json` para configs estruturadas, `.yml` apenas em workflows CI
+### 5.1 Emojis
 
-### 3.2 Slugs em YAML
-
-- `name:` em agentes — kebab-case sem prefixo
-- `description:` — uma frase, sem terminar com ponto final obrigatório
-
-### 3.3 Branches Git
-
-- Padrão GitFlow: `feature/<nome>`, `hotfix/<nome>`, `release/<versao>`
-- Chores: `chore/<descricao>` (ex: `chore/onion-saneamento-2026-05`)
-
-### 3.4 Commits
-
-- Conventional Commits em inglês: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`
-- Mensagem descritiva curta na primeira linha, contexto opcional após linha em branco
-- Quando aplicável, referenciar issue/ID de task
-
----
-
-## 4. Estilo de escrita
-
-### 4.1 Tom
-
-- **Documentação técnica**: direto, factual, sem floreios
-- **Análises críticas**: crítico mas construtivo; evitar tom acusatório
-- **Mensagens ao usuário**: claro e empático; sem jargão desnecessário
-- **Comentários em código**: explicar **por quê**, não o **quê** (o código mostra o quê)
-
-### 4.2 Emojis
-
-- **Permitido** em READMEs, INDEX, comandos, guias (uso moderado para hierarquia visual: 🧅, 📚, 🎯)
-- **Proibido** em meta-specs e análises críticas (manter tom profissional)
+- **Permitido** em READMEs, INDEX, skills, guias (uso moderado: 🧅, 📚, 🎯)
+- **Proibido** em meta-specs, ADRs e análises críticas
 - **Proibido** em código
 
-### 4.3 Estrutura de seções
-
-Documentos longos devem ter:
-
-- Frontmatter
-- Título (H1)
-- Sumário ou índice (quando >5 seções)
-- Seções numeradas ou nomeadas
-- Conclusão ou próximos passos (quando aplicável)
-
 ---
 
-## 5. Padrões de teste
+## 6. Padrões de teste
 
-Quando o Onion gerar ou validar testes (em projeto-alvo):
+Quando o Onion gerar/validar testes (em projeto-alvo):
 
 - Manter idioma do código-base do projeto-alvo
-- Descrições de teste podem ser bilíngues se o projeto-alvo permitir
 - Estrutura AAA (Arrange-Act-Assert) ou Given-When-Then quando aplicável
 - Cobertura de happy path + edge cases + erro
 
-Framework de testes documentado em: [docs/knowledge-base/frameworks/framework_testes.md](../knowledge-base/frameworks/framework_testes.md).
-
 ---
 
-## 6. Configuração e secrets
+## 7. Configuração e secrets
 
 - **Nunca** commitar credenciais, tokens, API keys
-- `.env` no `.gitignore` (sempre); `.env.example` versionado como referência
-- Documentar variáveis de ambiente em `.env.example` com comentários explicativos
-- Quando um agente referenciar variável, documentar isso em [integrations.md](./integrations.md)
-
----
-
-## 7. Acessibilidade da documentação
-
-- Headings hierárquicos (não pular níveis: H2 → H3 → H4, não H2 → H4)
-- Tabelas com cabeçalho claro
-- Imagens com texto alternativo (`![texto alt](path)`)
-- Diagramas Mermaid em vez de imagens binárias quando possível
+- **Secrets sempre em `.env`** (`.gitignore` sempre); `.env.example` versionado como referência
+- **Permissões de tools globais em `.zed/settings.json`** (`agent.tool_permissions`) — nunca por skill/specialist
+- **MCPs em `.zed/settings.json`** (`context_servers`) — usar interpolação `${VAR}` resolvida do `.env`, nunca colar tokens
+- Documentar variáveis de ambiente em `.env.example` com comentários
+- Quando uma skill/specialist referenciar variável, documentar em [integrations.md](./integrations.md)
 
 ---
 
 ## 8. Exemplos
 
-### Exemplo conforme
+### Exemplo conforme (frontmatter de skill)
 
-```markdown
+```yaml
 ---
-title: Knowledge Base — Spec-Driven Development
-date: 2025-12-02
-version: 1.0.0
+name: onion-engineer-start
+description: >
+  Inicia desenvolvimento de feature, cria sessão e analisa tasks.
+  Use quando o usuário começar a implementar uma feature planejada.
 ---
-
-# Spec-Driven Development
-
-## Conceito
-
-A metodologia **Spec-Driven Development** propõe...
-
-## Ferramentas
-
-| Ferramenta | Categoria | Status |
-|---|---|---|
-| Kiro | IDE | Beta |
-| Spec-Kit | CLI | Stable |
 ```
 
-- Frontmatter completo
-- Idioma pt-BR consistente
-- Headers hierárquicos
-- Tabela bem formatada
+- `name` = nome da pasta, naming `onion-cat-cmd`
+- `description` com "use quando"; sem campos inválidos
 
 ### Exemplo não-conforme
 
-```markdown
-# MyDocument
-
-This is a comment in english about spec.
-
-```bash
-DESCONTO=10  # variável em pt-BR
-```
-
-# Outra Section H1
+```yaml
+---
+name: EngineerStart
+allowed-tools: Bash(git *) Read Edit
+model: sonnet
+---
 ```
 
 Violações:
 
-- Filename presumível em PascalCase
-- Idioma misto (inglês fora de código)
-- Variável de código em pt-BR
-- Dois H1 no mesmo arquivo
+- `name` em PascalCase (deveria ser `onion-engineer-start`)
+- `allowed-tools` e `model` inexistentes no Zed (permissão é global; modelo via `agent.subagent_model`)
+- Tools no formato Claude Code (`Bash`, `Read`, `Edit`) em vez de snake_case Zed
 
 ---
 
@@ -248,4 +219,13 @@ Mudanças nesta spec exigem:
 
 1. PR específico para `docs/meta-specs/code-standards.md`
 2. Atualização do campo `version`
-3. Quando aplicável, migração de artefatos existentes ou plano de migração explícito
+3. Migração de artefatos existentes ou plano de migração explícito
+
+---
+
+## Histórico
+
+| Data | Versão | Mudança |
+|------|--------|---------|
+| 2026-05-18 | 1.0.0 | Criação (padrões de idioma/código para `.claude/`) |
+| 2026-06-03 | 2.0.0 | Port nativo Zed (ADR 0001) — tool names snake_case, naming de skills/specialists Zed, secrets em `.env`, permissões globais em `.zed/settings.json` |

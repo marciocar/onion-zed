@@ -1,135 +1,121 @@
 ---
-title: Meta-spec — Padrões para Comandos do Sistema Onion
-date: 2026-05-18
-version: 1.0.0
+title: Meta-spec — Padrões para Skills do Sistema Onion (nativo Zed)
+date: 2026-06-03
+version: 2.0.0
 level: L0
 status: active
-gate-keeper: "@metaspec-gate-keeper"
+gate-keeper: "specialists/metaspec-gate-keeper.md"
 ---
 
-# Meta-spec — Padrões para Comandos do Sistema Onion
+# Meta-spec — Padrões para Skills do Sistema Onion (nativo Zed)
 
 ## Propósito
 
-Define os padrões imutáveis (L0) que **todos os comandos** em `.claude/commands/` devem seguir. Inclui o conceito **invariante** de workflows faseados retomáveis, mecanismo que distingue o Onion de coleções de comandos avulsos.
+Define os padrões imutáveis (L0) que **todas as skills** em `.agents/skills/` devem seguir. No port nativo Zed ([ADR 0001](./adr/0001-zed-native-port.md)), os antigos comandos `/cat/x` (`.claude/commands/`) viram **Skills** invocáveis por `/onion-<cat>-<cmd>`. Inclui o conceito **invariante** de workflows faseados retomáveis — agora expressos como **cadeia de skills** — mecanismo que distingue o Onion de coleções de skills avulsas.
 
 Aplica-se ao **Sistema Onion**, não ao projeto-alvo onde o Onion é instalado.
 
 Referências relacionadas:
 
-- [agents.md](./agents.md) — padrões para agentes
+- [agents.md](./agents.md) — padrões para specialists
 - [architecture.md](./architecture.md) — estrutura de diretórios e dependências
 - [code-standards.md](./code-standards.md) — padrões de código e idioma
 - [integrations.md](./integrations.md) — padrões para integrações
+- [adr/0001-zed-native-port.md](./adr/0001-zed-native-port.md) — régua do port
 
 ---
 
 ## 1. Estrutura obrigatória
 
-Todo comando em `.claude/commands/<categoria>/<nome>.md` deve conter:
+Toda skill vive em `.agents/skills/<nome>/SKILL.md`, sendo `<nome>` filha **direta** de `.agents/skills/` (catálogo **flat**). Pastas aninhadas **não são descobertas** pelo Zed.
 
-### 1.1 Frontmatter YAML
+### 1.1 Frontmatter (Zed aceita apenas 3 campos)
 
 ```yaml
 ---
-description: <descrição em uma linha — aparece na lista de comandos>
-allowed-tools: [<tools permitidas, ou omitir para herdar contexto>]
-argument-hint: <hint opcional sobre argumentos esperados>
+name: onion-categoria-comando            # obrigatório, = nome da pasta
+description: >                           # obrigatório, <1024 chars, com "use quando"
+  [Verbo imperativo] [o que faz]. Use quando [contexto explícito].
+disable-model-invocation: true           # opcional; true = só invocação manual (/, @)
 ---
 ```
 
-- `description` é obrigatório
-- `allowed-tools` opcional, mas recomendado para comandos que executam ações sensíveis
-- `argument-hint` opcional, melhora UX da invocação
+- `name` é obrigatório e deve ser **idêntico ao nome da pasta**
+- `description` é obrigatório, imperativo, com gatilho explícito ("use quando"), < 1024 chars
+- `disable-model-invocation: true` (opcional) restringe a skill a invocação manual via `/` ou `@`
 
-### 1.2 Corpo do comando
+> Campos `model`, `allowed-tools`, `category`, `tags`, `version`, `paths` **não existem no Zed** — são ignorados. Permissões de tools são **globais** em `.zed/settings.json` (`agent.tool_permissions`), não por skill.
+
+### 1.2 Corpo da skill
 
 Após o frontmatter:
 
 ```markdown
-# <Título descritivo do comando>
+# <Título descritivo da skill>
 
 ## Objetivo
-<O que este comando entrega>
+<O que esta skill entrega>
 
 ## Quando usar
 <Gatilhos, casos de uso típicos>
 
 ## Etapas
-<Passo a passo executável>
+<Passo a passo executável usando tools nativas Zed: read_file, edit_file, terminal, grep, find_path>
 
 ## Saída esperada
 <Artefatos, mudanças, output ao usuário>
 
 ## Exemplos
-<Invocações reais>
+<Invocações reais: /onion-cat-cmd>
 ```
 
-Comandos curtos (< 50 linhas) podem omitir seções não aplicáveis, mas **devem manter frontmatter + título + propósito**.
+Skills curtas (< 50 linhas) podem omitir seções não aplicáveis, mas **devem manter frontmatter + título + propósito**.
 
-### 1.3 Convenção de `allowed-tools` (escopo mínimo)
+### 1.3 Permissões e tools
 
-Comandos que executam **ações sensíveis** (git, escrita de arquivos, operações
-de Task Manager) devem declarar `allowed-tools` escopado ao mínimo necessário,
-no formato de regras de permissão do Claude Code:
+- Não declarar permissões por skill — escopo de tools por-artefato foi **perdido** no port (ver ADR 0001). As permissões são consolidadas em `.zed/settings.json` (`agent.tool_permissions`): `default`, `always_allow`, `always_confirm`, `always_deny`.
+- Tools são referenciadas no corpo pelo nome nativo Zed em snake_case: `read_file`, `write_file`, `edit_file`, `terminal`, `grep`, `find_path`, `list_directory`, `fetch`, `diagnostics`, `spawn_agent`, `search_web`.
+- Detecção de provider via `.env`: usar `read_file` em `.env` ou `terminal` com `grep TASK_MANAGER_PROVIDER .env`.
+- Operação técnica do provider ativo é **delegada** a um specialist via `spawn_agent` (ver `agents.md`) — a skill não enumera tools MCP.
 
-```yaml
-allowed-tools: Bash(git *) Bash(gh *) Read Edit Write Grep Glob
-```
-
-Diretrizes:
-
-- Escopar pelo **uso real observado** — restritivo demais quebra o comando.
-- Para Bash, prefira prefixos específicos (`Bash(git *)`) a `Bash(*)`.
-- Detecção de provider via `.env`: `Bash(cat .env*)`.
-- Ferramentas MCP do provider ativo são herdadas do agente delegado
-  (`@clickup-specialist`, etc.) — o comando não precisa enumerá-las.
-- Comandos puramente informativos (READMEs, ajuda) podem omitir.
-
-Comandos sensíveis canônicos que **devem** declarar `allowed-tools`:
-`engineer/pr`, `engineer/start`, `engineer/work`, `product/task`,
-`git/fast-commit`.
-
-> Automação a nível de evento (hooks) vive em `.claude/settings.json`, não no
-> frontmatter — ver `architecture.md` e `integrations.md`.
+> **Não há hooks no Zed.** A automação a nível de evento (antigo `SessionStart`) deixa de existir; a detecção de provider passa a ser **instruction-driven** dentro da skill orquestradora.
 
 ---
 
-## 2. Categorias válidas
+## 2. Categorias válidas (prefixo de naming)
 
-Comandos devem residir em uma das categorias abaixo. Categorias com asterisco representam **as três dimensões peer do ciclo Onion**.
+A categoria vive no **nome** da skill, não em subpasta. Categorias com asterisco representam **as três dimensões peer do ciclo Onion**.
 
-| Categoria | Função | Volume típico |
+| Categoria | Função | Exemplo de skill |
 |---|---|---|
-| `product/` (*) | Discovery, especificação, decomposição de tarefas, branding, reuniões | 20+ |
-| `engineer/` (*) | Planejamento e implementação faseada de features | 10+ |
-| `docs/` | Geração e validação de documentação (incluindo `/docs:build-compliance-docs` da dimensão compliance) | 10+ |
-| `git/` | GitFlow, feature/release/hotfix, code review | 10+ |
-| `meta/` | Criação de comandos/agentes/skills/KBs, integração | 8+ |
-| `common/` | Templates e prompts compartilhados | 8+ |
-| `validate/` | Validação de testes, QA, workflows colaborativos | 4+ |
-| `test/` | Estratégias de teste (unit, integration, e2e) | 3 |
-| `development/` | Comandos de desenvolvimento específicos | 1+ |
-| `quick/` | Análises pontuais rápidas | 1+ |
-| `global/` | Comandos transversais | 1+ |
-| (root) | `onion.md` e `warm-up.md` — pontos de entrada | 2 |
+| `product` (*) | Discovery, especificação, decomposição, branding, reuniões | `onion-product-task` |
+| `engineer` (*) | Planejamento e implementação faseada de features | `onion-engineer-start` |
+| `docs` | Geração e validação de documentação (incl. compliance) | `onion-docs-build-tech-docs` |
+| `git` | GitFlow, feature/release/hotfix, code review | `onion-git-feature-start` |
+| `meta` | Criação de skills/specialists/KBs, integração | `onion-meta-create-skill` |
+| `validate` | Validação de testes, QA, workflows colaborativos | `onion-validate-workflow` |
+| `test` | Estratégias de teste (unit, integration, e2e) | `onion-test-unit` |
+| `development` | Skills de desenvolvimento específicas | `onion-development-runflow-dev` |
+| `quick` | Análises pontuais rápidas | `onion-quick-analisys` |
 
-Categorias podem ter subdiretórios quando agrupam variantes (ex: `git/feature/`, `git/hotfix/`, `git/release/`, `validate/test-strategy/`, `validate/qa-points/`).
+**Core skills** (sem prefixo de categoria): `onion`, `onion-warmup`, `onion-patterns`, `onion-validation`, `language-standards`.
+
+> Variantes de GitFlow que antes eram subpastas (`git/feature/start`) viram nome flat: `onion-git-feature-start`, `onion-git-hotfix-finish`, etc. Recursos compartilhados antes em `common/` (templates/prompts) migram para `.agents/onion/templates/` e `.agents/onion/prompts/` — **não** são skills.
 
 ---
 
 ## 3. Workflows faseados — INVARIANTE DO FRAMEWORK
 
-**Princípio**: o Onion implementa workflows faseados como **mecanismo central**. Múltiplos comandos cobrindo fases distintas de um mesmo fluxo, com estado retomável persistido em `.claude/sessions/`, são **valor de design**, não duplicação.
+**Princípio**: o Onion implementa workflows faseados como **mecanismo central**. Múltiplas skills cobrindo fases distintas de um mesmo fluxo, com estado retomável persistido em `.agents/onion/sessions/`, são **valor de design**, não duplicação. No modelo Zed, um workflow é uma **cadeia de skills** invocadas em sequência (`/onion-cat-x` → `/onion-cat-y`).
 
 ### 3.1 Workflows canônicos
 
-Os **dois workflows abaixo são invariantes** do framework. Devem ser preservados intactos. Qualquer proposta de fusão deve ser rejeitada por `@metaspec-gate-keeper`.
+Os **dois workflows abaixo são invariantes** do framework. Devem ser preservados intactos. Qualquer proposta de fusão deve ser rejeitada (delegar a `specialists/metaspec-gate-keeper.md`).
 
-**Workflow de Engenharia** (6 fases):
+**Workflow de Engenharia** (6 fases — cadeia de skills):
 
 ```
-engineer/plan → engineer/start → engineer/work → engineer/pre-pr → engineer/pr → engineer/pr-update
+/onion-engineer-plan → /onion-engineer-start → /onion-engineer-work → /onion-engineer-pre-pr → /onion-engineer-pr → /onion-engineer-pr-update
 ```
 
 - `plan` — analisa requisitos e cria plano estruturado
@@ -139,10 +125,10 @@ engineer/plan → engineer/start → engineer/work → engineer/pre-pr → engin
 - `pr` — cria Pull Request com GitFlow e sync
 - `pr-update` — atualiza PR existente
 
-**Workflow de Produto** (6 fases):
+**Workflow de Produto** (6 fases — cadeia de skills):
 
 ```
-product/collect → product/refine → product/spec → product/task → product/estimate → product/feature
+/onion-product-collect → /onion-product-refine → /onion-product-spec → /onion-product-task → /onion-product-estimate → /onion-product-feature
 ```
 
 - `collect` — coleta ideias de features ou bugs
@@ -155,48 +141,40 @@ product/collect → product/refine → product/spec → product/task → product
 ### 3.2 Regras para workflows faseados
 
 1. Cada fase deve ter **input claro** (estado da sessão ou argumentos), **output claro** (próximo estado da sessão) e ser **invocável isoladamente** quando o estado permite
-2. Estado entre fases é persistido em `.claude/sessions/<feature>/`
-3. Fases nomeadas explicitamente, sem ambiguidade de ordem
-4. Novos workflows similares devem seguir o mesmo padrão (sessões persistentes, fases nomeadas, retomável)
+2. Estado entre fases é persistido em `.agents/onion/sessions/<feature-slug>/`
+3. Fases nomeadas explicitamente, sem ambiguidade de ordem; o nome flat preserva a fase (`onion-engineer-pre-pr`)
+4. Novos workflows similares devem seguir o mesmo padrão (sessões persistentes, fases nomeadas, cadeia retomável)
 5. **Proibido fundir fases** de workflow ativo sem justificativa formal aprovada via PR específico para esta meta-spec
 
-### 3.3 Padrão para identificar workflow faseado
+### 3.3 Padrão para identificar skill de workflow faseado
 
-Características de um comando que faz parte de workflow faseado:
-
-- Vive em categoria que representa dimensão do ciclo (`product/`, `engineer/`)
-- Lê ou escreve estado em `.claude/sessions/`
-- Tem nome que sugere fase explícita (verbo de ação temporal: `start`, `work`, `pre-pr`, `pr-update`)
-- Documenta a posição no ciclo no corpo do comando
+- Tem nome `onion-product-*` ou `onion-engineer-*` (dimensões do ciclo)
+- Lê ou escreve estado em `.agents/onion/sessions/`
+- Tem nome que sugere fase explícita (verbo temporal: `start`, `work`, `pre-pr`, `pr-update`)
+- Documenta a posição no ciclo no corpo da skill
 
 ---
 
 ## 4. Convenção de naming
 
-- **Slug** (nome do arquivo): kebab-case (`pre-pr.md`, `build-tech-docs.md`)
-- **Path completo**: `.claude/commands/<categoria>/<slug>.md` ou `.claude/commands/<categoria>/<subcategoria>/<slug>.md`
-- **Invocação**: usuário invoca com `/<categoria>:<slug>` ou `/<categoria>/<subcategoria>:<slug>`
+- **Nome da pasta = `name`**: `onion-<categoria>-<comando>`, lowercase + hífen, ≤ 64 chars
+- **Path**: `.agents/skills/onion-<categoria>-<comando>/SKILL.md` (filha **direta**, sem subpasta)
+- **Invocação**: `/onion-<categoria>-<comando>` ou `@<skill>` no chat do Zed
+- Ex.: `/onion-engineer-start`, `/onion-product-task`, `/onion-git-feature-start`, `/onion-meta-create-skill`
 
-### 4.1 Política de duplicação de nomes entre categorias
+> **Mudou do legado:** o slash `/cat/cmd` do Claude Code não existe no Zed. A categoria deixa de ser subpasta e passa para o nome (prefixo `onion-cat-`).
 
-Os nomes abaixo aparecem em múltiplas categorias por razões funcionais legítimas. Esta política torna a regra explícita.
+### 4.1 Política de colisão de nomes
 
-| Nome | Categorias | Categoria canônica | Variantes em outras categorias |
-|---|---|---|---|
-| `README` | `product/`, `git/`, `common/`, `docs/` | Específico por categoria (não há canônico) | Cada README descreve a categoria que o contém |
-| `warm-up` | `product/`, `engineer/`, root (`warm-up.md`) | root (`/warm-up`) | `product/warm-up`, `engineer/warm-up` são specializations contextuais |
-| `start` | `engineer/`, `git/feature/`, `git/hotfix/`, `git/release/` | `engineer/start` (sessão de desenvolvimento) | `git/feature/start`, `git/hotfix/start`, `git/release/start` são fluxos GitFlow específicos |
-| `finish` | `git/feature/`, `git/hotfix/`, `git/release/` | Específico por subcategoria GitFlow | Sempre invocar com path completo |
-| `help` | `git/`, `docs/` | Específico por categoria | Ajuda contextual da categoria |
-| `estimate` | `product/`, `validate/qa-points/` | `product/estimate` (story points de feature) | `validate/qa-points/estimate` é QA story points |
-| `plan` | `engineer/`, `product/light-arch` (similar) | `engineer/plan` (planejamento de implementação) | `product/light-arch` é design de arquitetura leve |
-| `check` | `product/`, `product/task-check` | `product/check` (verificação contra meta-specs) | `product/task-check` é verificação de task |
+Como o catálogo é flat e a categoria está no nome, não há colisão real entre categorias (`onion-product-estimate` ≠ `onion-validate-qa-points-estimate`). Regras:
 
-**Regra geral**:
+| Situação | Regra |
+|---|---|
+| Mesmo verbo em categorias distintas | O prefixo de categoria desambígua: `onion-engineer-start` vs `onion-git-feature-start` |
+| Variantes GitFlow | Caminho completo no nome: `onion-git-feature-finish`, `onion-git-hotfix-finish`, `onion-git-release-finish` |
+| READMEs de categoria | Não são skills; vivem como docs de apoio, não em `.agents/skills/` |
 
-- Quando houver canônico, novos comandos com nome curto devem usar o canônico ou nome explícito
-- Quando não houver canônico, sempre invocar com path completo (`/<categoria>:<slug>`)
-- Renomes para resolver ambiguidade devem usar aliases temporários para não quebrar invocações existentes
+`name` duplicado entre skills é **proibido** — validar com `grep -rh "^name:" .agents/skills/*/SKILL.md` (ver `onion-validation`).
 
 ---
 
@@ -204,101 +182,78 @@ Os nomes abaixo aparecem em múltiplas categorias por razões funcionais legíti
 
 | Limite | Linhas | Tratamento |
 |---|---|---|
-| Recomendado | até 500 | OK |
-| Soft warning | 500 – 800 | Considerar modularização |
-| Hard limit | > 800 | Refatoração obrigatória antes de merge |
+| Recomendado | até 300 | OK |
+| Soft warning | 300 – 500 | Considerar modularização |
+| Hard limit | > 500 | Refatoração obrigatória antes de merge |
 
-Comandos que excederem 800 linhas devem extrair partes para:
+> O hard limit caiu de 800 (Claude Code) para **500** linhas/skill — skills têm lifecycle persistente em contexto no Zed.
 
-- Templates em `.claude/commands/common/templates/`
-- Prompts em `.claude/commands/common/prompts/`
+Skills que excederem 500 linhas devem extrair partes para:
+
+- Templates em `.agents/onion/templates/`
+- Prompts em `.agents/onion/prompts/`
 - Knowledge bases em `docs/knowledge-base/`
-- Sub-comandos referenciados
-
-### 5.1 Isenções (não são comandos invocáveis)
-
-O limite acima aplica-se a **comandos invocáveis** (`/categoria/nome`). São
-**isentos** por natureza, seguindo guidance própria:
-
-- **Fragmentos de template** em `.claude/commands/common/templates/` — são
-  estruturas de referência (ex.: `business_context_template.md`,
-  `technical_context_template.md`), auto-registrados como skills
-  `common:templates:*` e referenciados por múltiplos agentes/comandos. Tamanho é
-  inerente ao template; **não relocar** sem atualizar o registro de skill e
-  todas as referências.
-- **Fragmentos de prompt** em `.claude/commands/common/prompts/` — skills
-  `common:prompts:*`.
-- **READMEs de categoria** (`<categoria>/README.md`) — são índices; devem ser
-  enxutos (apontar para comandos/KB), mas não contam como comando.
+- Specialists delegáveis via `spawn_agent`
 
 ---
 
 ## 6. Modularização
 
-Comandos podem reaproveitar:
+Skills podem reaproveitar:
 
-- **Templates** em `.claude/commands/common/templates/` (estruturas reutilizáveis)
-- **Prompts** em `.claude/commands/common/prompts/` (instruções compartilhadas)
-- **Skills** em `.claude/skills/` (cérebro de orquestração)
-- **Agentes** em `.claude/agents/<categoria>/` (delegação especializada)
+- **Templates** em `.agents/onion/templates/` (estruturas reutilizáveis)
+- **Prompts** em `.agents/onion/prompts/` (instruções compartilhadas)
+- **Specialists** em `.agents/onion/specialists/` (delegação via `spawn_agent`)
+- **Utils** em `.agents/onion/utils/` (abstrações, ex: Task Manager)
 
-Comando que duplica >50 linhas de outro comando deve refatorar para template ou prompt compartilhado.
+Skill que duplica > 50 linhas de outra skill deve refatorar para template ou prompt compartilhado.
 
 ---
 
 ## 7. Exemplos de conformidade
 
-### Exemplo conforme (workflow faseado)
+### Exemplo conforme (skill de workflow faseado)
 
-Arquivo: `.claude/commands/engineer/start.md`
+Pasta: `.agents/skills/onion-engineer-start/SKILL.md`
 
-- Frontmatter com `description`
-- Vive em `engineer/` (dimensão de engenharia)
-- Faz parte do workflow canônico
-- Persiste estado em `.claude/sessions/`
+- Frontmatter Zed com `name: onion-engineer-start` + `description` com "use quando"
+- Filha direta de `.agents/skills/`
+- Faz parte da cadeia canônica de engenharia
+- Persiste estado em `.agents/onion/sessions/`
 - Nome reflete fase explícita
-
-**Veredito**: `@metaspec-gate-keeper` aprova.
-
-### Exemplo conforme (comando atômico)
-
-Arquivo: `.claude/commands/meta/setup-integration.md`
-
-- Frontmatter com `description` e `allowed-tools`
-- Vive em `meta/` (categoria válida)
-- Não faz parte de workflow faseado — função atômica clara
-- Tamanho dentro do limite
 
 **Veredito**: aprovado.
 
-### Exemplo quase-conforme
+### Exemplo conforme (skill atômica)
 
-Arquivo hipotético: `.claude/commands/validate/test-strategy/analyze.md` (1.134 linhas reais)
+Pasta: `.agents/skills/onion-meta-setup-integration/SKILL.md`
 
-- Frontmatter correto
-- Categoria válida
-- Tamanho acima de soft warning (500), acima de hard limit (800)
+- Frontmatter Zed válido
+- Categoria válida (`meta`)
+- Função atômica clara (não faz parte de workflow)
+- Tamanho < 500 linhas
 
-**Veredito**: requer refatoração antes de próximo merge tocando este arquivo.
+**Veredito**: aprovado.
 
 ### Exemplo não-conforme
 
-Arquivo hipotético: `.claude/commands/misc/MyCommand.md`
+Pasta hipotética: `.agents/skills/git/feature/start/SKILL.md`
 
-- Categoria `misc/` inválida
-- Filename PascalCase em vez de kebab-case
-- Sem frontmatter
+- Skill **aninhada** — não descoberta pelo Zed (deveria ser `onion-git-feature-start`)
+- Frontmatter com `allowed-tools` (campo inexistente no Zed)
+- Referência a `@gitflow-specialist` (deveria ser `spawn_agent` + persona)
 
-**Veredito**: rejeitado.
+**Veredito**: rejeitado (3 violações).
 
 ---
 
 ## 8. Proibições explícitas
 
-- **Proibido** fundir comandos de workflow faseado canônico (engineer/* ou product/*) sem PR específico para esta meta-spec
-- **Proibido** criar categoria fora da lista válida
-- **Proibido** criar comando sem frontmatter
-- **Proibido** comando com `name` em formato diferente de kebab-case
+- **Proibido** fundir skills de workflow faseado canônico (`onion-engineer-*` ou `onion-product-*`) sem PR específico para esta meta-spec
+- **Proibido** skill aninhada (subpasta em `.agents/skills/`)
+- **Proibido** `name` em formato diferente de `onion-<cat>-<cmd>` (exceto core skills)
+- **Proibido** campos de frontmatter inexistentes no Zed (`allowed-tools`, `model`, `category`, `tags`, `paths`)
+- **Proibido** referenciar `/cat/cmd` (use `/onion-cat-cmd`) ou `@agente` como subagente nomeado (use `spawn_agent` + persona)
 
 ---
 
@@ -308,5 +263,14 @@ Mudanças nesta spec exigem:
 
 1. PR específico para `docs/meta-specs/commands.md`
 2. Atualização do campo `version` no frontmatter
-3. Validação por `@metaspec-gate-keeper` em comandos existentes
-4. Especificamente para mudança em workflows canônicos (Seção 3.1): aprovação registrada em commit message com link para issue de discussão
+3. Validação das skills existentes (delegar a `specialists/metaspec-gate-keeper.md`)
+4. Para mudança em workflows canônicos (Seção 3.1): aprovação registrada em commit com link para issue de discussão
+
+---
+
+## Histórico
+
+| Data | Versão | Mudança |
+|------|--------|---------|
+| 2026-05-18 | 1.0.0 | Criação (padrões de comandos `.claude/commands/`) |
+| 2026-06-03 | 2.0.0 | Port nativo Zed (ADR 0001) — comandos viram skills `.agents/skills/onion-<cat>-<cmd>`, frontmatter Zed, catálogo flat, limite 500 linhas |

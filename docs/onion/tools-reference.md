@@ -1,26 +1,31 @@
 ---
-title: "Referência Completa de Ferramentas"
-description: "Todas as ferramentas do Sistema Onion organizadas por categoria"
-last_updated: "2025-10-03"
+title: "Referência de Ferramentas Nativas do Zed"
+description: "Ferramentas nativas do Zed usadas pelo Sistema Onion + MCP via context_servers"
+last_updated: "2026-06-03"
 category: "onion"
-tags: [tools, reference, onion, esperanto, ai-agents]
+tags: [tools, reference, onion, zed, ai-agents]
 ---
 
-# 🛠️ Referência Completa de Ferramentas
+# 🛠️ Referência de Ferramentas (nativo Zed)
 
-Este documento lista todas as ferramentas disponíveis no sistema Onion em formato TypeScript, organizadas por categoria para facilitar o uso e compreensão.
+Este documento lista as ferramentas disponíveis para skills e specialists do Sistema Onion **no Zed**, organizadas por categoria. Ver [ADR 0001](../meta-specs/adr/0001-zed-native-port.md).
+
+> **Ferramentas nativas do Zed** (nomes canônicos): `read_file`, `write_file`, `edit_file`, `terminal`, `grep`, `find_path`, `list_directory`, `fetch`, `diagnostics`, `spawn_agent`, `search_web`. As assinaturas TypeScript abaixo são ilustrativas. **Permissões** dessas tools são **globais** em `.zed/settings.json` (`agent.tool_permissions`) — não por skill.
+>
+> **MCP no Zed:** servidores MCP (ClickUp, Context7, Firecrawl, etc.) são declarados como **`context_servers`** em `.zed/settings.json` e exigem **worktree trust**. As seções de MCP mais abaixo continuam válidas — apenas a forma de declaração mudou (de `.mcp.json` para `context_servers`).
 
 ## 📋 Índice por Categoria
 
 - [📁 Busca e Exploração de Código](#-busca-e-exploração-de-código)
 - [📝 Manipulação de Arquivos](#-manipulação-de-arquivos)
 - [⚡ Terminal e Execução](#-terminal-e-execução)
+- [🤖 Delegação a Specialists](#-delegação-a-specialists)
 - [📓 Jupyter Notebooks](#-jupyter-notebooks)
-- [🔍 Linting](#-linting)
-- [🌐 Busca na Web](#-busca-na-web)
+- [🔍 Diagnostics (Linting)](#-diagnostics-linting)
+- [🌐 Busca na Web e Fetch](#-busca-na-web-e-fetch)
 - [🧠 Memórias](#-memórias)
 - [✅ Gestão de Tarefas](#-gestão-de-tarefas)
-- [🔌 MCP Resources](#-mcp-resources)
+- [🔌 MCP via context_servers](#-mcp-via-context_servers)
 - [📋 ClickUp MCP](#-clickup-mcp-gestão-de-projetos)
 - [📚 Context7 MCP](#-context7-mcp-documentação)
 - [🧭 Sequential Thinking MCP](#-sequential-thinking-mcp-análise-complexa)
@@ -28,32 +33,11 @@ Este documento lista todas as ferramentas disponíveis no sistema Onion em forma
 - [🕷️ Firecrawl MCP](#️-firecrawl-mcp-web-scraping)
 - [🖥️ Chrome DevTools MCP](#️-chrome-devtools-mcp-automação-browser)
 - [⚙️ NX Extension MCP](#️-nx-extension-mcp-framework-nx)
-- [🌿 Comandos Git Gitflow](#-comandos-git-gitflow)
+- [🌿 Skills Git Gitflow](#-skills-git-gitflow)
 
 ---
 
 ## 📁 Busca e Exploração de Código
-
-### `codebase_search`
-```typescript
-function codebase_search(
-  query: string,
-  target_directories: string[],
-  explanation: string,
-  search_only_prs?: boolean
-): Promise<SearchResults>
-```
-**Propósito**: Busca semântica por significado no código, não por texto exato
-
-**Quando usar**:
--  Explorar codebases desconhecidas
--  Perguntas sobre "como/onde/o que" funciona
--  Encontrar código por significado
-
-**Exemplo**:
-```bash
-codebase_search("como funciona autenticação de usuários", ["src/auth"], "Encontrar fluxo de auth")
-```
 
 ### `grep`
 ```typescript
@@ -71,25 +55,26 @@ function grep(
   i?: boolean // case insensitive
 ): Promise<GrepResults>
 ```
-**Propósito**: Busca poderosa baseada em ripgrep com regex completo
+**Propósito**: Busca poderosa baseada em ripgrep com regex completo (ferramenta nativa `grep`)
 
 **Quando usar**:
 -  Busca exata de símbolos/strings
 -  Padrões regex complexos
 -  Múltiplos arquivos rapidamente
+-  Explorar codebases desconhecidas (busca por padrão em vez de busca semântica)
 
-### `glob_file_search`
+### `find_path`
 ```typescript
-function glob_file_search(
+function find_path(
   glob_pattern: string,
   target_directory?: string
 ): Promise<FileList>
 ```
-**Propósito**: Busca arquivos por padrões glob
+**Propósito**: Busca arquivos por padrões glob (ferramenta nativa do Zed; substitui o antigo `glob_file_search`)
 
 **Exemplo**:
 ```bash
-glob_file_search("**/*.test.ts") // Todos arquivos de teste TypeScript
+find_path("**/*.test.ts") // Todos arquivos de teste TypeScript
 ```
 
 ---
@@ -106,27 +91,16 @@ function read_file(
 ```
 **Propósito**: Leitura de arquivos do sistema local com numeração de linha
 
-### `write`
+### `write_file`
 ```typescript
-function write(
+function write_file(
   file_path: string,
   contents: string
 ): Promise<WriteResult>
 ```
-**Propósito**: Escrita/sobrescrever arquivos no sistema local
+**Propósito**: Escrita/sobrescrever arquivos no sistema local (ferramenta nativa `write_file`)
 
-### `search_replace`
-```typescript
-function search_replace(
-  file_path: string,
-  old_string: string,
-  new_string: string,
-  replace_all?: boolean
-): Promise<ReplaceResult>
-```
-**Propósito**: Substituição exata de strings em arquivos
-
-### `MultiEdit`
+### `edit_file`
 ```typescript
 interface EditOperation {
   old_string: string;
@@ -134,49 +108,64 @@ interface EditOperation {
   replace_all?: boolean;
 }
 
-function MultiEdit(
+function edit_file(
   file_path: string,
   edits: EditOperation[]
-): Promise<MultiEditResult>
+): Promise<EditResult>
 ```
-**Propósito**: Múltiplas edições em um único arquivo de forma atômica
+**Propósito**: Edição de arquivos no Zed (ferramenta nativa `edit_file`). Substitui os antigos `search_replace` e `MultiEdit` — faz substituições exatas, uma ou várias por chamada.
 
-### `delete_file`
+### `list_directory`
 ```typescript
-function delete_file(
-  target_file: string,
-  explanation: string
-): Promise<DeleteResult>
-```
-**Propósito**: Exclusão de arquivos
-
-### `list_dir`
-```typescript
-function list_dir(
+function list_directory(
   target_directory: string,
   ignore_globs?: string[]
 ): Promise<DirectoryListing>
 ```
-**Propósito**: Listagem de diretórios com filtros opcionais
+**Propósito**: Listagem de diretórios com filtros opcionais (ferramenta nativa `list_directory`)
+
+> Não há ferramenta nativa dedicada de exclusão de arquivo no Zed — use `terminal` (`rm`) quando necessário e permitido por `agent.tool_permissions`.
 
 ---
 
 ## ⚡ Terminal e Execução
 
-### `run_terminal_cmd`
+### `terminal`
 ```typescript
-function run_terminal_cmd(
+function terminal(
   command: string,
-  is_background: boolean,
+  is_background?: boolean,
   explanation?: string
 ): Promise<CommandResult>
 ```
-**Propósito**: Execução de comandos no terminal com controle de background
+**Propósito**: Execução de comandos no terminal (ferramenta nativa `terminal`)
 
 **Características**:
-- Suporte a comandos background (`is_background: true`)
+- Suporte a comandos background quando aplicável
 - Flags não-interativas automáticas
 - Pipe para `cat` em comandos com pager
+
+---
+
+## 🤖 Delegação a Specialists
+
+### `spawn_agent`
+```typescript
+function spawn_agent(
+  prompt: string
+): Promise<AgentResult>
+```
+**Propósito**: Dispara um subagente no Zed para atuar como um specialist do Onion. O subagente herda as mesmas tools e tem janela de contexto própria.
+
+**Padrão Onion**:
+```text
+spawn_agent("Leia .agents/onion/specialists/<slug>.md e atue como esse especialista para: <tarefa>")
+```
+
+**Quando usar**:
+-  Delegar trabalho especializado (ex.: `react-developer`, `code-reviewer`, `jira-specialist`)
+-  Isolar contexto de uma subtarefa longa
+-  Orquestração Master-Slave (a skill principal coordena, os specialists executam)
 
 ---
 
@@ -197,48 +186,47 @@ function edit_notebook(
 
 ---
 
-## 🔍 Linting
+## 🔍 Diagnostics (Linting)
 
-### `read_lints`
+### `diagnostics`
 ```typescript
-function read_lints(
+function diagnostics(
   paths?: string[]
-): Promise<LintResults>
+): Promise<DiagnosticsResults>
 ```
-**Propósito**: Leitura de erros de linter do workspace atual
+**Propósito**: Leitura de erros/avisos (linter, type-check) do workspace atual (ferramenta nativa `diagnostics`; substitui o antigo `read_lints`)
 
 ---
 
-## 🌐 Busca na Web
+## 🌐 Busca na Web e Fetch
 
-### `web_search`
+### `search_web`
 ```typescript
-function web_search(
+function search_web(
   search_term: string,
-  explanation: string
+  explanation?: string
 ): Promise<SearchResults>
 ```
-**Propósito**: Busca informações em tempo real na web
+**Propósito**: Busca informações em tempo real na web (ferramenta nativa `search_web`)
 
 **Quando usar**:
 -  Informações atualizadas não disponíveis nos dados de treinamento
 -  Verificação de fatos atuais
 -  Pesquisa de tecnologias/eventos recentes
 
+### `fetch`
+```typescript
+function fetch(
+  url: string
+): Promise<FetchResult>
+```
+**Propósito**: Busca o conteúdo de uma URL específica (ferramenta nativa `fetch`). Útil para ler documentação, APIs REST (ex.: chamadas diretas ao Jira REST) e páginas conhecidas.
+
 ---
 
 ## 🧠 Memórias
 
-### `update_memory`
-```typescript
-function update_memory(
-  action: "create" | "update" | "delete",
-  knowledge_to_store?: string,
-  title?: string,
-  existing_knowledge_id?: string
-): Promise<MemoryResult>
-```
-**Propósito**: Gerenciamento de memórias persistentes para referência futura
+> **Nota (Zed):** o Onion **não** depende de uma tool nativa de memória. A persistência de contexto entre sessões é feita por **arquivos**: as **sessions** em `.agents/onion/sessions/<feature-slug>/` (`context.md`, `plan.md`, `decisions.md`, `progress.md`) e os documentos em `docs/` (business/technical/meta-specs). Para "lembrar" algo, grave com `write_file`/`edit_file` no arquivo de sessão apropriado.
 
 ---
 
@@ -266,7 +254,9 @@ function todo_write(
 
 ---
 
-## 🔌 MCP Resources
+## 🔌 MCP via context_servers
+
+> No Zed, servidores MCP são declarados em `.zed/settings.json` na chave `context_servers` e exigem **worktree trust**. As ferramentas de cada MCP ficam disponíveis para skills/specialists conforme `agent.tool_permissions`. As seções de MCP a seguir (ClickUp, Context7, Firecrawl, etc.) descrevem servidores que podem ser declarados dessa forma.
 
 ### `list_mcp_resources`
 ```typescript
@@ -985,7 +975,7 @@ function mcp_extension_nx_available_plugins(
 4. **Filtros server-side**: Use filtros avançados em `get_workspace_tasks`
 
 ### **🎯 Para Precisão**
-1. **Busca semântica primeiro**: Use `codebase_search` para exploração, `grep` para símbolos específicos
+1. **Busca primeiro**: Use `grep` (regex/símbolos) e `find_path` (globs) para exploração antes de abrir arquivos
 2. **IDs sempre preferidos**: Use taskId/listId ao invés de nomes quando possível
 3. **Context window otimização**: Ajuste `max_tokens` e `detail_level` conforme necessidade
 4. **Validação de estados**: Use `get_repo_status` antes de operações complexas
@@ -1006,7 +996,7 @@ graph TD
     A[clone_repo] --> B[get_repo_structure]
     B --> C[get_repo_critical_files]
     C --> D[get_source_repo_map]
-    D --> E[codebase_search específicos]
+    D --> E[grep / find_path específicos]
     E --> F[read_file detalhes]
 ```
 
@@ -1014,7 +1004,7 @@ graph TD
 ```mermaid
 graph TD
     A[create_task] --> B[start_time_tracking]
-    B --> C[MultiEdit código]
+    B --> C[edit_file código]
     C --> D[create_task_comment progresso]
     D --> E[update_task status]
     E --> F[stop_time_tracking]
@@ -1023,96 +1013,90 @@ graph TD
 ### **Pesquisa e Documentação**
 ```mermaid
 graph TD
-    A[web_search contexto] --> B[resolve_library_id]
+    A[search_web contexto] --> B[resolve_library_id]
     B --> C[get_library_docs]
-    C --> D[write documentação]
-    D --> E[update_memory persistir]
+    C --> D[write_file documentação]
+    D --> E[grava no docs/ persistir]
 ```
 
 ---
 
 ---
 
-## 🌿 Comandos Git Gitflow
+## 🌿 Skills Git Gitflow
 
-Sistema completo de comandos Git com workflows Gitflow integrados ao Sistema Onion, **REFATORADO** para seguir padrão oficial Claude Code Commands com simplificação radical (87.3% redução de código) mantendo funcionalidade superior.
+Conjunto completo de skills Git com workflows Gitflow integrados ao Sistema Onion, em `.agents/skills/` e invocáveis por `/onion-git-*`. As skills são Markdown AI-interpretável; a execução real usa a tool nativa `terminal` (git).
 
-### ✨ Refatoração Completa - Janeiro 2025
-- **DE**: Scripts bash complexos (500-1000+ linhas cada) 
-- **PARA**: Markdown AI-interpretável (79-146 linhas cada)
-- **RESULTADO**: 87.3% redução de código + funcionalidade aprimorada
-- **INTEGRAÇÃO**: @gitflow-specialist nativo + ClickUp MCP ativo
-
-### Comandos Implementados
+### Skills disponíveis
 ```typescript
-// Setup e Ajuda  
-'/git/help': void;           // Sistema de ajuda interativo + guidance
-'/git/init': void;           // Setup Gitflow automático
+// Setup e Ajuda
+'/onion-git-help': void;           // Sistema de ajuda interativo + guidance
+'/onion-git-init': void;           // Setup Gitflow automático
 
-// Feature Development  
-'/git/feature/start': (nome: string) => void;    // Criar feature backlog ClickUp
-'/git/feature/finish': void;                     // Merge + cleanup automático
+// Feature Development
+'/onion-git-feature-start': (nome: string) => void;    // Criar feature + task no Task Manager
+'/onion-git-feature-finish': void;                     // Merge + cleanup automático
 
 // Release Management
-'/git/release/start': (version: string) => void; // Release + versionamento
-'/git/release/finish': void;                     // Deploy production + tags
+'/onion-git-release-start': (version: string) => void; // Release + versionamento
+'/onion-git-release-finish': void;                     // Deploy production + tags
 
 // Emergency Hotfix
-'/git/hotfix/start': (nome: string) => void;     // Emergency setup < 2h SLA  
-'/git/hotfix/finish': void;                      // Deploy crítico emergencial
+'/onion-git-hotfix-start': (nome: string) => void;     // Emergency setup < 2h SLA
+'/onion-git-hotfix-finish': void;                      // Deploy crítico emergencial
 
 // Workflow Híbrido
-'/engineer/hotfix': (desc: string, params?: {
+'/onion-engineer-hotfix': (desc: string, params?: {
   'related-tasks'?: string;  // "id1,id2,id3"
-  'tags'?: string;          // "urgent,critical"  
+  'tags'?: string;          // "urgent,critical"
   'status'?: string;        // "In Progress"
   'priority'?: number;      // 1=urgent, 4=low
-}) => void;                 // Task ClickUp + Git workflow completo
+}) => void;                 // Task no Task Manager + Git workflow completo
 
 // Pós-Merge
-'/git/sync': (branch?: string) => void;          // Sincronização automática
+'/onion-git-sync': (branch?: string) => void;          // Sincronização automática
 ```
 
 ### Funcionalidades Principais
 - **Versionamento Semântico**: Auto-bump patch/minor/major + versões específicas
-- **ClickUp Integration**: 20+ API calls com task creation, updates, comments
+- **Task Manager Integration**: criação/atualização/comentários via abstração (Jira/ClickUp/Asana/Linear)
 - **Master/Main Detection**: Auto-detecção de convenção do repositório
 - **Emergency Workflows**: SLA < 2 horas com production-first strategy
-- **Session Management**: Integração completa com `/engineer/*` commands
+- **Session Management**: Integração completa com as skills `/onion-engineer-*`
 - **Error Recovery**: Graceful degradation e rollback preparation
 
-### Examples de Uso
+### Exemplos de Uso
 ```bash
 # Setup inicial
-/git/init
+/onion-git-init
 
 # Feature development
-/git/feature/start "oauth-authentication"
-/engineer/start oauth-authentication  
-/git/feature/finish
+/onion-git-feature-start "oauth-authentication"
+/onion-engineer-start oauth-authentication
+/onion-git-feature-finish
 
-# Release workflow  
-/git/release/start "minor"    # 2.0.1 → 2.1.0
+# Release workflow
+/onion-git-release-start "minor"    # 2.0.1 → 2.1.0
 # ... testing ...
-/git/release/finish
+/onion-git-release-finish
 
 # Emergency hotfix
-/engineer/hotfix "Critical payment timeout" --related-tasks="123,456" --tags="urgent"
+/onion-engineer-hotfix "Critical payment timeout" --related-tasks="123,456" --tags="urgent"
 # ... fix implementation ...
-/git/hotfix/finish
+/onion-git-hotfix-finish
 
 # Synchronization
-/git/sync develop
+/onion-git-sync develop
 ```
 
 ### Integração Sistema Onion
 - **Workflows Completos**: Planejamento → Desenvolvimento → Deploy
-- **ClickUp MCP**: Tracking automático de progresso e decisões técnicas
-- **Session Context**: Mantém estado entre comandos e sessões
-- **Agent Integration**: Complementa `@gitflow-specialist` (guidance vs execution)
+- **Task Manager**: tracking automático de progresso e decisões técnicas
+- **Session Context**: mantém estado entre skills e sessões via `.agents/onion/sessions/`
+- **Specialist Integration**: complementa o specialist `gitflow-specialist` (guidance vs execution), delegado via `spawn_agent`
 
 ---
 
 **Sistema Onion** - Desenvolvimento inteligente com IA 🧅 🚀
 
-*Última atualização: Janeiro 2025 - Comandos Git Gitflow implementados*
+*Última atualização: 2026-06-03 — port nativo Zed (ADR 0001)*

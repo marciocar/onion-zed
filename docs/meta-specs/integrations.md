@@ -1,17 +1,17 @@
 ---
-title: Meta-spec — Padrões de Integração do Sistema Onion
-date: 2026-05-18
-version: 1.0.0
+title: Meta-spec — Padrões de Integração do Sistema Onion (nativo Zed)
+date: 2026-06-03
+version: 2.0.0
 level: L0
 status: active
-gate-keeper: "@metaspec-gate-keeper"
+gate-keeper: "specialists/metaspec-gate-keeper.md"
 ---
 
-# Meta-spec — Padrões de Integração do Sistema Onion
+# Meta-spec — Padrões de Integração do Sistema Onion (nativo Zed)
 
 ## Propósito
 
-Define os padrões obrigatórios para integrações com sistemas externos (Task Managers, MCPs, APIs). Usa **Task Manager Abstraction** como referência canônica de design de adapter — toda nova integração deve seguir o mesmo padrão.
+Define os padrões obrigatórios para integrações com sistemas externos (Task Managers, MCPs, APIs). No port nativo Zed ([ADR 0001](./adr/0001-zed-native-port.md)), MCPs deixam de ser declarados em `.mcp.json` e passam para `context_servers` em `.zed/settings.json`. Usa **Task Manager Abstraction** como referência canônica de design de adapter — toda nova integração segue o mesmo padrão.
 
 Aplica-se ao **Sistema Onion**, não ao projeto-alvo onde o Onion é instalado.
 
@@ -19,79 +19,56 @@ Referências relacionadas:
 
 - [agents.md](./agents.md), [commands.md](./commands.md)
 - [architecture.md](./architecture.md), [code-standards.md](./code-standards.md)
+- [adr/0001-zed-native-port.md](./adr/0001-zed-native-port.md) — régua do port
 
-Referência técnica: [.claude/utils/task-manager/](../../.claude/utils/task-manager/).
+Referência técnica: [.agents/onion/utils/task-manager/](../../.agents/onion/utils/task-manager/).
 
 ---
 
 ## 1. Task Manager Abstraction como referência canônica
 
-A Task Manager Abstraction é o padrão **SDAAL** (Specification-Driven AI Abstraction Layer) implementado de referência. Estrutura:
+A Task Manager Abstraction é o padrão **SDAAL** (Specification-Driven AI Abstraction Layer) de referência. A lógica migra de `.claude/utils/task-manager/` para `.agents/onion/utils/task-manager/` **sem reescrita**. Estrutura:
 
 ```
-.claude/utils/task-manager/
+.agents/onion/utils/task-manager/
 ├── factory.md           # Instancia o adapter via TASK_MANAGER_PROVIDER
 ├── interface.md         # Contrato ITaskManager
 ├── types.md             # Tipos e DTOs
-├── detector.md          # Detecção automática de provider
+├── detector.md          # Detecção de provider (instruction-driven, sem hooks)
 └── adapters/
     ├── jira.md          # Adapter Jira (REST v3, ADF)
-    ├── clickup.md       # Adapter ClickUp (MCP)
-    ├── asana.md         # Adapter Asana (HTML notes)
-    └── linear.md        # Adapter Linear (Markdown)
+    ├── clickup.md       # Adapter ClickUp (MCP standalone)
+    ├── asana.md         # Adapter Asana (REST / fallback)
+    └── linear.md        # Adapter Linear (REST/GraphQL / fallback)
 ```
 
-Toda nova integração (ex: novo Task Manager, novo serviço de comunicação) deve replicar essa estrutura.
+Toda nova integração deve replicar essa estrutura.
 
 ---
 
 ## 2. Estrutura obrigatória de adapter
 
-Para cada integração com sistema externo:
+Para cada integração com sistema externo, em `.agents/onion/utils/<dominio>/`:
 
 ```
-.claude/utils/<dominio>/
-├── factory.md           # Roteamento por variável de ambiente
-├── interface.md         # Contrato comum (operações independentes de provider)
-├── types.md             # Tipos compartilhados
-├── detector.md          # Detecção automática (opcional)
-└── adapters/
-    └── <provider>.md    # Um arquivo por provider suportado
+factory.md           # Roteamento por variável de ambiente
+interface.md         # Contrato comum (operações independentes de provider)
+types.md             # Tipos compartilhados
+detector.md          # Detecção (opcional)
+adapters/<provider>.md  # Um arquivo por provider suportado
 ```
 
 ### 2.1 Conteúdo de cada arquivo
 
-**factory.md**:
+**factory.md** — lê variável do `.env`, valida obrigatórias, retorna adapter ou erro descritivo, lida com `none`/ausência (fallback gracioso).
 
-- Lê variável de ambiente do `.env` para decidir provider
-- Valida variáveis obrigatórias do provider escolhido
-- Retorna instância do adapter ou erro descritivo
-- Lida com `none` ou ausência (fallback gracioso)
+**interface.md** — lista operações que **todo provider deve suportar**, inputs/outputs neutros, sem vazar detalhes de provider.
 
-**interface.md**:
+**types.md** — DTOs comuns, enums, tipos compartilhados.
 
-- Lista operações que **todo provider deve suportar**
-- Define inputs e outputs em formato neutro
-- Não vaza detalhes de provider
+**detector.md** (opcional) — detecção quando a variável não é explícita; heurísticas. No Zed **não há hooks**, logo a detecção é **instruction-driven**: a skill orquestradora lê `.env` via `read_file`/`terminal` no início do fluxo.
 
-**types.md**:
-
-- DTOs comuns
-- Enums
-- Tipos compartilhados
-
-**detector.md** (opcional):
-
-- Detecção automática quando variável não é declarada explicitamente
-- Heurísticas (existência de outras variáveis, presença de arquivos config)
-
-**adapters/<provider>.md**:
-
-- Implementação concreta para o provider
-- Lista variáveis específicas necessárias
-- Formatação requerida (ADF, Markdown, HTML, Unicode)
-- Tratamento de erros específicos do provider
-- Limites e cotas conhecidas
+**adapters/<provider>.md** — implementação concreta: variáveis necessárias, formatação requerida (ADF/Markdown/HTML/Unicode), tratamento de erros e cotas do provider.
 
 ---
 
@@ -100,12 +77,12 @@ Para cada integração com sistema externo:
 ### 3.1 Convenção de nomes
 
 - Prefixo do domínio em UPPER_SNAKE_CASE: `TASK_MANAGER_PROVIDER`, `JIRA_API_TOKEN`, `CLICKUP_WORKSPACE_ID`
-- Sufixo descritivo do que a variável contém (`_TOKEN`, `_HOST`, `_ID`, `_URL`)
+- Sufixo descritivo (`_TOKEN`, `_HOST`, `_ID`, `_URL`)
 - Booleanos como string: `"true"` / `"false"`
 
 ### 3.2 Obrigatórias vs opcionais
 
-Cada adapter deve documentar em sua seção:
+Cada adapter documenta suas variáveis. Exemplo (Jira):
 
 | Variável | Tipo | Obrigatoriedade | Default | Descrição |
 |---|---|---|---|---|
@@ -118,92 +95,86 @@ Cada adapter deve documentar em sua seção:
 
 ### 3.3 Fallback gracioso
 
-Quando o usuário invoca um comando que requer integração mas a variável obrigatória está ausente:
+Quando o usuário invoca uma skill que requer integração mas a variável obrigatória está ausente:
 
 1. **Não inventar** valor nem assumir provider alternativo
 2. Reportar em pt-BR qual variável falta
-3. Sugerir comando para configurar: `/meta:setup-integration`
-4. Continuar offline quando possível (ex: `@task-specialist` decompõe localmente sem persistir)
-
-Exemplo de mensagem:
+3. Sugerir: `/onion-meta-setup-integration`
+4. Continuar offline quando possível (`specialists/task-specialist.md` decompõe localmente sem persistir)
 
 ```
 Não foi possível conectar ao Jira: variável JIRA_API_TOKEN está vazia.
-Para configurar, execute: /meta:setup-integration
+Para configurar, execute: /onion-meta-setup-integration
 Para operar offline, defina TASK_MANAGER_PROVIDER=none no .env.
 ```
 
 ### 3.4 `.env.example` versionado
 
-- `.env.example` no root deve conter **todas** as variáveis documentadas com valor placeholder
-- Comentários explicando obrigatoriedade e formato
+- `.env.example` no root contém **todas** as variáveis com placeholder e comentários
 - `.env` no `.gitignore` sempre
+- **Secrets só no `.env`** — nunca no `.zed/settings.json` (use `${VAR}`)
 
 ---
 
-## 4. MCPs (Model Context Protocol) suportados
+## 4. MCPs via `context_servers` (`.zed/settings.json`)
 
-### 4.1 MCPs declarados em agentes
+> **Mudou do legado:** MCP stdio deixa de viver em `.mcp.json` (`mcpServers`) e passa para `.zed/settings.json` (`context_servers`). `enableAllProjectMcpServers`/`enabledMcpjsonServers` do Claude Code não existem no Zed.
 
-Quando um agente depende de MCP, declarar nas `tools`:
+### 4.1 Declaração
 
-```yaml
-tools:
-  - read_file
-  - mcp_ClickUp_clickup_create_task
-  - mcp_ClickUp_clickup_update_task
+```json
+{
+  "context_servers": {
+    "ClickUp": {
+      "command": "npx",
+      "args": ["-y", "<clickup-mcp-server-package>"],
+      "env": {
+        "CLICKUP_API_TOKEN": "${CLICKUP_API_TOKEN}",
+        "CLICKUP_WORKSPACE_ID": "${CLICKUP_WORKSPACE_ID}"
+      }
+    }
+  }
+}
 ```
 
-### 4.2 MCPs comuns no framework atual
+- **NUNCA** colar tokens — usar interpolação `${VAR}` resolvida do `.env`/ambiente
+- `context_servers` exige **worktree confiável** (worktree trust) no Zed
+- `/onion-meta-setup-integration` guia a configuração de `.env` + `context_servers`
 
-| MCP | Provedor | Usado por |
+### 4.2 Suporte de MCP por provider no Zed
+
+| Provider | Integração no Zed | Observação |
 |---|---|---|
-| `ClickUp_*` | ClickUp MCP | `@clickup-specialist`, comandos `/product/*` quando provider é ClickUp |
-| `claude_ai_Asana__*` | Anthropic-managed | Provider Asana |
-| `claude_ai_Linear__*` | Anthropic-managed | Provider Linear |
-| `claude_ai_Atlassian__*` | Anthropic-managed | Provider Jira |
-| `claude_ai_Slack__*` | Anthropic-managed | Notificações (opcional) |
-| `claude_ai_Notion__*` | Anthropic-managed | Documentação externa (opcional) |
+| **Jira** | **REST direto** via `fetch`/`terminal` | Não precisa de MCP — provider atual |
+| **ClickUp** | **MCP standalone** em `context_servers` | Funciona como server stdio próprio |
+| **Asana** | **Não funciona** (MCP claude.ai-hosted) | Fallback: adapter REST ou `none` |
+| **Linear** | **Não funciona** (MCP claude.ai-hosted) | Fallback: adapter REST/GraphQL ou `none` |
 
-### 4.3 Configuração
-
-- **MCP servers stdio** (ex.: ClickUp) são declarados em `.mcp.json` na raiz do
-  projeto. O framework versiona um template **`.mcp.json.example`** — o
-  projeto-alvo copia para `.mcp.json` e ajusta ao provider ativo.
-- **NUNCA** colar tokens no `.mcp.json`: usar interpolação `${VAR}` resolvida do
-  `.env`/ambiente.
-- MCPs **Anthropic-managed** (Asana, Linear, Atlassian/Jira) entram como
-  conectores hospedados (claude.ai) e normalmente **não** precisam de entrada
-  stdio no `.mcp.json`.
-- Aprovação/habilitação de MCP servers via `enableAllProjectMcpServers` /
-  `enabledMcpjsonServers` em `.claude/settings.json`.
-- `/meta:setup-integration` guia a configuração de `.env` + `.mcp.json` quando
-  aplicável.
+> Os conectores **claude.ai-hosted** (Asana, Linear, Atlassian) **não estão disponíveis no Zed**. Para Jira a solução é REST direto; ClickUp usa MCP standalone; Asana/Linear operam por adapter REST ou caem em modo `none` até existir MCP standalone equivalente.
 
 ---
 
 ## 5. Formatação por provider
 
-Cada provider tem formato preferido para descrições, comentários e payloads. **Adapter é responsável por traduzir** dados internos para formato do provider.
+Cada provider tem formato preferido. **Adapter é responsável por traduzir** dados internos para o formato do provider.
 
 | Provider | Descrições de task | Comments | Estrutura |
 |---|---|---|---|
 | Jira Cloud (v3) | ADF (Atlassian Document Format) — JSON estruturado | ADF | Bulk via `/issue/bulk` |
-| Jira Server/DC (v2) | Wiki markup ou plain text (string) | Wiki markup | Search via `/search` (paginated) |
-| ClickUp | Markdown nativo em `markdown_description` | Unicode visual em `commentText` (`━━━`, `∟`, `▶`, `◆`, `✅`) | API REST + MCP |
-| Asana | HTML notes (subset) ou plain text | HTML | API REST |
-| Linear | Markdown nativo (suporte rico) | Markdown | API GraphQL |
+| Jira Server/DC (v2) | Wiki markup ou plain text | Wiki markup | Search via `/search` (paginated) |
+| ClickUp | Markdown nativo em `markdown_description` | Unicode visual em `commentText` (`━━━`, `∟`, `▶`, `◆`, `✅`) | REST + MCP standalone |
+| Asana | HTML notes (subset) ou plain text | HTML | REST |
+| Linear | Markdown nativo | Markdown | REST/GraphQL |
 
-### 5.1 Templates por provider
+### 5.1 Roteamento de delegação por provider
 
-Templates de formatação para cada provider devem viver em:
+| Provider | Specialist (via `spawn_agent`) |
+|---|---|
+| `jira` | `specialists/jira-specialist.md` (JQL, ADF, transitions, bulk; REST via `fetch`) |
+| `clickup` | `specialists/clickup-specialist.md` (MCP, Unicode comments, custom fields) |
+| `asana` / `linear` / `none` | `specialists/task-specialist.md` (agnóstico/offline) |
 
-```
-.claude/utils/<dominio>/adapters/<provider>.md
-.claude/utils/<dominio>/templates/<provider>-<tipo>.md   # quando aplicável
-```
-
-Para ClickUp especificamente, existe documento de referência: `.claude/utils/clickup-formatting.md`.
+Templates de formatação por provider vivem em `.agents/onion/utils/<dominio>/adapters/<provider>.md`.
 
 ---
 
@@ -211,31 +182,26 @@ Para ClickUp especificamente, existe documento de referência: `.claude/utils/cl
 
 ### 6.1 Bulk-first
 
-Quando operar em lote (>5 itens), preferir operação bulk do provider:
+Operação em lote (> 5 itens) usa endpoint bulk do provider:
 
 - Jira: `POST /rest/api/3/issue/bulk` (até 50/req)
 - ClickUp: endpoints bulk quando disponíveis
-- Evitar loops N+1 em criação/update
+- Evitar loops N+1
 
 ### 6.2 Field selection
 
-Ao buscar itens, declarar apenas campos necessários para reduzir payload:
-
-- Jira: `fields=summary,status,assignee`
+- Jira: `fields=summary,status,assignee` (reduz payload 70%+)
 - Linear: query GraphQL com seleção explícita
 
 ### 6.3 Paginação
 
-- Implementar paginação consistente
-- Jira Cloud v3: usar `nextPageToken` (o antigo `/search` foi removido em maio/2025)
-- ClickUp: usar `page` parameter
-- Não iterar todas as páginas quando não necessário
+- Jira Cloud v3: `POST /rest/api/3/search/jql` com `nextPageToken` (o antigo `/search` foi removido em maio/2025)
+- ClickUp: `page`
+- Não iterar todas as páginas sem necessidade
 
 ---
 
 ## 7. Tratamento de erros
-
-### 7.1 Categorias
 
 | Erro | Resposta esperada do adapter |
 |---|---|
@@ -243,38 +209,36 @@ Ao buscar itens, declarar apenas campos necessários para reduzir payload:
 | Token inválido / expirado | Mensagem clara em pt-BR + sugestão de regeneração |
 | Rate limit | Retry com backoff exponencial, máximo 3 tentativas |
 | Recurso não encontrado | Reportar ID + provider + sugestão de verificação |
-| Erro de validação do provider | Reportar mensagem original do provider + tradução pt-BR |
+| Erro de validação do provider | Mensagem original do provider + tradução pt-BR |
 | Erro de rede transitório | Retry com backoff |
 | Erro inesperado | Logar e reportar, não silenciar |
 
-### 7.2 Não silenciar
-
-- Adapter nunca deve "engolir" erro sem reportar
-- Comandos chamadores devem propagar erro ao usuário com contexto
+Adapter nunca deve "engolir" erro; skills chamadoras propagam ao usuário com contexto.
 
 ---
 
 ## 8. Adicionar novo adapter — checklist
 
-Ao adicionar suporte a novo provider:
-
-1. Criar `.claude/utils/<dominio>/adapters/<provider>.md` seguindo estrutura de Seção 2.1
+1. Criar `.agents/onion/utils/<dominio>/adapters/<provider>.md` (Seção 2.1)
 2. Atualizar `factory.md` para reconhecer o novo provider
-3. Atualizar `detector.md` se houver detecção automática
-4. Documentar variáveis de ambiente em `.env.example`
-5. Atualizar CLAUDE.md com tabela "Provider → Variáveis → Agente → Adapter"
-6. Criar especialista em `.claude/agents/development/<provider>-specialist.md` (opcional, mas recomendado)
-7. Adicionar a esta meta-spec (Seções 4.2 e 5)
-8. Validar com `@metaspec-gate-keeper`
+3. Atualizar `detector.md` se houver detecção
+4. Documentar variáveis em `.env.example`
+5. Atualizar `AGENTS.md` (tabela "Provider → Variáveis → Specialist → Adapter")
+6. Criar specialist em `.agents/onion/specialists/<provider>-specialist.md` (opcional, recomendado)
+7. Se exigir MCP standalone, adicionar `context_servers` em `.zed/settings.json`
+8. Atualizar esta meta-spec (Seções 4.2 e 5)
+9. Validar (delegar a `specialists/metaspec-gate-keeper.md`)
 
 ---
 
 ## 9. Proibições explícitas
 
 - **Proibido** integração que requer credencial fora de `.env`
-- **Proibido** invocar API externa diretamente em comando sem passar pelo adapter
+- **Proibido** token literal em `.zed/settings.json` (usar `${VAR}`)
+- **Proibido** chamar API externa diretamente em skill sem passar pelo adapter
 - **Proibido** adapter que vaza tipos específicos do provider para o nível de interface
 - **Proibido** assumir provider sem ler `.env` primeiro
+- **Proibido** declarar MCP em `.mcp.json` (usar `context_servers` em `.zed/settings.json`)
 
 ---
 
@@ -285,4 +249,13 @@ Mudanças nesta spec exigem:
 1. PR específico para `docs/meta-specs/integrations.md`
 2. Atualização do campo `version`
 3. Migração de adapters existentes quando aplicável
-4. Validação por `@metaspec-gate-keeper`
+4. Validação (delegar a `specialists/metaspec-gate-keeper.md`)
+
+---
+
+## Histórico
+
+| Data | Versão | Mudança |
+|------|--------|---------|
+| 2026-05-18 | 1.0.0 | Criação (integrações via `.mcp.json`, MCPs claude.ai-hosted) |
+| 2026-06-03 | 2.0.0 | Port nativo Zed (ADR 0001) — MCP via `context_servers` em `.zed/settings.json`, Jira REST direto, ClickUp MCP standalone, Asana/Linear fallback REST/none, abstração em `.agents/onion/utils/task-manager/` |

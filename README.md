@@ -6,9 +6,9 @@
 
 ## O que é
 
-O Onion é um **framework template em `.claude/`** que se instala em qualquer projeto — novo, legado ou regulado — para orquestrar o ciclo completo de desenvolvimento com Claude Code. Separa **decisão de negócio**, **execução técnica** e **governança/compliance** em contextos distintos, conectados por fluxos e padrões repetíveis. Comandos, agentes especializados e documentação passam a conversar entre si em vez de competir por atenção no chat ou em arquivos soltos.
+O Onion é um **framework nativo do Zed** (em `.agents/` + `.zed/`) que se instala em qualquer projeto — novo, legado ou regulado — para orquestrar o ciclo completo de desenvolvimento. Separa **decisão de negócio**, **execução técnica** e **governança/compliance** em contextos distintos, conectados por fluxos e padrões repetíveis. Skills, specialists e documentação passam a conversar entre si em vez de competir por atenção no chat ou em arquivos soltos.
 
-O Onion **não é produto npm**, **não é distribuído publicamente** e **não tem CLI standalone**. Plataforma única: Claude Code.
+O Onion **não é produto npm**, **não é distribuído publicamente** e **não tem CLI standalone**. Plataforma única: **Zed**.
 
 ---
 
@@ -34,7 +34,7 @@ O Onion **não é produto npm**, **não é distribuído publicamente** e **não 
 ## Como funciona em três passos
 
 1. **Definir a intenção** no contexto certo — produto (descoberta e spec), engenharia (implementação e entrega) ou compliance (governança e conformidade).
-2. **Executar com apoio** de comandos padronizados e agentes especializados, em ciclos faseados retomáveis (`product/collect→feature` e `engineer/plan→pr-update`).
+2. **Executar com apoio** de skills padronizadas (`/onion-<categoria>-<comando>`) e specialists delegados via `spawn_agent`, em ciclos faseados retomáveis (`product/collect→feature` e `engineer/plan→pr-update`).
 3. **Validar e registrar** — qualidade, segurança e conhecimento ficam sincronizados para o próximo ciclo.
 
 ---

@@ -1,0 +1,53 @@
+// Configuração de projeto do Sistema Onion (nativo Zed) — ver docs/meta-specs/adr/0001-zed-native-port.md
+// Skills locais (.agents/skills/) e context_servers exigem worktree confiável (worktree trust).
+{
+  "agent": {
+    // Modelo padrão do agente principal (orquestrador Onion + skills).
+    "default_model": {
+      "provider": "anthropic",
+      "model": "claude-opus-4-8"
+    },
+    // Modelo dos subagentes criados via spawn_agent (delegação a specialists).
+    "subagent_model": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5"
+    },
+    // Permissões GLOBAIS de tools — consolidam o que antes era allowed-tools por comando/agente.
+    // Prioridade: built-in > always_deny > always_confirm > always_allow > default.
+    "tool_permissions": {
+      "default": "confirm",
+      "always_allow": [
+        "read_file",
+        "grep",
+        "list_directory",
+        "find_path",
+        "fetch",
+        "diagnostics"
+      ],
+      "always_confirm": [
+        "terminal",
+        "write_file",
+        "edit_file",
+        "create_directory",
+        "move_path",
+        "copy_path"
+      ],
+      "always_deny": [
+        "delete_path"
+      ]
+    }
+  },
+  // Servidores MCP do provider de Task Manager ativo.
+  // Jira (provider atual) usa REST direto (fetch) — NÃO precisa de MCP aqui.
+  // ClickUp: descomente e ajuste o pacote do MCP server standalone quando ativar clickup.
+  "context_servers": {
+    // "ClickUp": {
+    //   "command": "npx",
+    //   "args": ["-y", "<clickup-mcp-server-package>"],
+    //   "env": {
+    //     "CLICKUP_API_TOKEN": "${CLICKUP_API_TOKEN}",
+    //     "CLICKUP_WORKSPACE_ID": "${CLICKUP_WORKSPACE_ID}"
+    //   }
+    // }
+  }
+}

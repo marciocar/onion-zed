@@ -8,15 +8,17 @@ Bem-vindo ao índice central de documentação do projeto. Este documento serve 
 
 ## 🎯 Visão Geral
 
-Este projeto é o **Sistema Onion** — um framework de comandos `.claude/` para uso interno com:
+Este projeto é o **Sistema Onion** — um framework **nativo do Zed** (`.agents/` + `.zed/`) para uso interno com:
 
-- 🤖 **78 comandos invocáveis** Claude Code em 9 categorias (+ 12 fragmentos compartilhados em `common/` e 3 READMEs)
-- 🎯 **49 agentes de IA especializados** em 9 categorias
-- 🧩 **4 skills** em `.claude/skills/` (`onion` — cérebro do sistema; `onion-patterns`; `onion-validation`; `language-standards`)
+> 🦓 **Port nativo Zed (2026-06-03)** — o framework foi migrado de Claude Code para os primitivos nativos do Zed. Comandos viraram **skills** (`/onion-<cat>-<cmd>`), agentes viraram **specialists** (delegados via `spawn_agent`). Ver [ADR 0001](meta-specs/adr/0001-zed-native-port.md).
+
+- 🤖 **81 skills invocáveis** (`/onion-<categoria>-<comando>`) — 72 ex-comandos + 5 core (`onion`, `onion-warmup`, `onion-patterns`, `onion-validation`, `language-standards`) + 4 do piloto de engenharia
+- 🎯 **49 specialists** em `.agents/onion/specialists/`, delegados via `spawn_agent`
+- 🧅 **Skill `onion`** — orquestrador/ponto de entrada com ativação automática
+- 🔗 **Task Manager Abstraction** plugável (Jira, ClickUp, Asana, Linear) em `.agents/onion/utils/task-manager/`
 - 📚 **Knowledge Bases estruturadas** para consumo por IA
-- 🧅 **Skill + Comando `/onion`** — ponto de entrada inteligente com ativação automática
-- 🔗 **Task Manager Abstraction** plugável (Jira, ClickUp, Asana, Linear)
 - 🏗️ **Spec as Code Multi-Context** — separação entre business, technical e meta-specs
+- ⚙️ **Config nativa Zed** em `.zed/settings.json`; rules em `AGENTS.md`
 
 ---
 
@@ -205,9 +207,10 @@ Knowledge Bases estruturadas para consumo por IA e referência técnica:
 ### Provedores de Serviços (1 arquivo)
 - **Microsoft Graph Teams API** - Guia completo de integração
 
-### Ferramentas (2 arquivos)
+### Ferramentas (3 arquivos)
 - **Claude Code Commands Best Practices 2025** - Boas práticas de comandos Claude Code
 - **Whisper** - Sistema de transcrição de áudio (OpenAI)
+- **Zed** ✨ NOVO - Editor de código open-source em Rust com IA integrada, MCP, Skills e External Agents
 
 **Localização:** `docs/knowledge-base/`
 
@@ -422,6 +425,7 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 - [Spec-as-Code Strategy](knowledge-base/concepts/spec-as-code-strategy.md)
 - [Spec-Driven Development](knowledge-base/concepts/spec-driven-development.md) ✨ NOVO
 - [Whisper](knowledge-base/tools/whisper.md) - Transcrição de áudio
+- [Zed](knowledge-base/tools/zed.md) ✨ NOVO - Editor IA-first (Rust, MCP, Skills, External Agents)
 
 ### Configuração
 - [Configuração Inicial](onion/getting-started.md)
@@ -471,10 +475,10 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 ### 🔧 Comandos de Debug
 
 ```bash
-/onion "ajuda"                  # Ponto de entrada inteligente
-/meta/all-tools                 # Lista todos os comandos
-/docs/build-index               # Reconstruir este índice
-@onion "sua pergunta"           # Agente orquestrador master
+/onion "ajuda"                  # Skill orquestradora (ponto de entrada)
+/onion-meta-all-tools           # Lista todas as ferramentas nativas Zed
+/onion-docs-build-index         # Reconstruir este índice
+/onion-warmup                   # Warm-up geral do projeto
 ```
 
 ---

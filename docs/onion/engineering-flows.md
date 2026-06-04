@@ -1,20 +1,20 @@
 # 🔄 Fluxos de Engenharia Detalhados
 
-> **Versão**: 3.0.0 | **Última atualização**: 2025-11-24
+> **Última atualização**: 2026-06-03 | **Plataforma**: Zed (ver [ADR 0001](../meta-specs/adr/0001-zed-native-port.md))
 
-Este guia documenta os workflows completos de desenvolvimento, desde a concepção até a entrega, com integração ao **Task Manager Abstraction**. Todos os fluxos funcionam com qualquer provedor ativo (`TASK_MANAGER_PROVIDER`: `jira` | `clickup` | `asana` | `linear` | `none`); onde um detalhe for específico de um provedor, ele está marcado como tal.
+Este guia documenta os workflows completos de desenvolvimento, desde a concepção até a entrega, com skills `/onion-engineer-*` e delegação a specialists via `spawn_agent`, integrados ao **Task Manager Abstraction**. Todos os fluxos funcionam com qualquer provedor ativo (`TASK_MANAGER_PROVIDER`: `jira` | `clickup` | `asana` | `linear` | `none`); onde um detalhe for específico de um provedor, ele está marcado como tal.
 
 > **Convenção de exemplos:** ao longo do guia usamos um ID genérico de task (`AUTH-123`). No provedor ativo isso corresponde a uma issue do Jira (`AUTH-123`), uma task do ClickUp, uma task do Asana ou uma issue do Linear. O ID exato segue o formato do provedor configurado.
 
-## 🆕 Novidades v3.0
+## 🧩 Componentes-chave (nativo Zed)
 
-- **Sessions estruturadas** em `.claude/sessions/<feature-slug>/`
+- **Sessions estruturadas** em `.agents/onion/sessions/<feature-slug>/`
 - **Comentários de progresso** na task do provedor ativo (detalhado + resumido)
   - _Específico do ClickUp:_ comentários duais usam formatação visual Unicode (ver adapter ClickUp)
   - _Específico do Jira:_ comentários e descrições são renderizados em ADF (Atlassian Document Format)
 - **Mapeamento fase→subtask** automático
   - _Específico do ClickUp:_ o mapeamento usa subtasks nativas do ClickUp; em Jira corresponde a sub-tasks/issue links, em Linear a sub-issues, em Asana a subtasks
-- **Prompts modulares** em `common/prompts/`
+- **Prompts modulares** em `.agents/onion/prompts/`
 
 ## 📋 Índice de Fluxos
 
@@ -24,7 +24,7 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 - [🔧 Fluxo de Refatoração](#-fluxo-de-refatoração)
 - [⚡ Fluxo de Hotfix](#-fluxo-de-hotfix)
 - [🎯 Integração com Task Manager por Fluxo](#-integração-com-task-manager-por-fluxo)
-- [🤖 Workflows com Agentes Especializados](#-workflows-com-agentes-especializados)
+- [🤖 Workflows com Specialists](#-workflows-com-specialists)
 
 ---
 
@@ -34,7 +34,7 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 
 #### 1.1 Criação da Task
 ```bash
-/product/task "Implementar sistema de autenticação OAuth2 com Google e GitHub"
+/onion-product-task "Implementar sistema de autenticação OAuth2 com Google e GitHub"
 ```
 
 **O que acontece**:
@@ -58,7 +58,7 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 
 #### 1.2 Refinamento (Opcional)
 ```bash
-/product/refine
+/onion-product-refine
 ```
 
 **Usar quando**:
@@ -70,14 +70,14 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 
 #### 2.1 Inicialização
 ```bash
-/engineer/start
+/onion-engineer-start
 ```
 
 **Input necessário**: ID da task no provedor ativo (`AUTH-123`)
 
 **O que acontece**:
 -  Verifica se está em feature branch apropriada
--  Cria pasta `.claude/sessions/auth-oauth2/`
+-  Cria pasta `.agents/onion/sessions/auth-oauth2/`
 -  Busca detalhes da task no provedor ativo
 -  Analisa contexto, objetivos e dependências
 -  Identifica arquivos e componentes necessários
@@ -85,7 +85,7 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 
 **Estrutura criada**:
 ```
-.claude/sessions/auth-oauth2/
+.agents/onion/sessions/auth-oauth2/
 ├── plan.md          # Plano de desenvolvimento em fases
 ├── context.md       # Contexto e requisitos
 ├── decisions.md     # Decisões arquiteturais
@@ -94,7 +94,7 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 
 #### 2.2 Análise Arquitetural (se necessário)
 ```bash
-/product/light-arch
+/onion-product-light-arch
 ```
 
 **Usar quando**:
@@ -106,13 +106,13 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 
 #### 3.1 Trabalho na Funcionalidade
 ```bash
-/engineer/work .claude/sessions/auth-oauth2/
+/onion-engineer-work .agents/onion/sessions/auth-oauth2/
 ```
 
 **O que acontece em cada iteração**:
 -  Lê plan.md e identifica fase atual
 -  Apresenta próximos passos específicos
--  Delega trabalho para sub-agentes especializados:
+-  Delega trabalho a specialists via `spawn_agent`:
   - `python-developer` para backend
   - `react-developer` para frontend
   - `test-engineer` para testes
@@ -143,7 +143,7 @@ Durante o desenvolvimento, o sistema:
 
 #### 4.1 Validações Pré-PR
 ```bash
-/engineer/pre-pr
+/onion-engineer-pre-pr
 ```
 
 **Verificações realizadas**:
@@ -156,7 +156,7 @@ Durante o desenvolvimento, o sistema:
 
 #### 4.2 Criação do Pull Request
 ```bash
-/engineer/pr
+/onion-engineer-pr
 ```
 
 **O que acontece**:
@@ -182,7 +182,7 @@ Durante o desenvolvimento, o sistema:
 
 ### 🔗 Relacionado
 - Task (provedor ativo): AUTH-123
-- Sessão: .claude/sessions/auth-oauth2/
+- Sessão: .agents/onion/sessions/auth-oauth2/
 
 ### ✅ Checklist
 - [x] Testes passando
@@ -215,13 +215,13 @@ Após aprovação:
 ### **Início Rápido para Bugs**
 ```bash
 # Para bugs simples (< 2h)
-/product/collect "Bug: Dashboard não carrega dados do usuário após login"
+/onion-product-collect "Bug: Dashboard não carrega dados do usuário após login"
 # → Análise rápida e criação de task
-/engineer/start
+/onion-engineer-start
 # → Desenvolvimento direto sem sessão complexa
-/engineer/work "correção dashboard login"
+/onion-engineer-work "correção dashboard login"
 # → Fix implementado
-/engineer/pr
+/onion-engineer-pr
 # → PR com correção
 ```
 
@@ -229,7 +229,7 @@ Após aprovação:
 
 #### 1. Investigação e Documentação
 ```bash
-/product/task "Bug: Dashboard não carrega após login em ambiente de produção"
+/onion-product-task "Bug: Dashboard não carrega após login em ambiente de produção"
 ```
 
 **Informações coletadas**:
@@ -240,7 +240,7 @@ Após aprovação:
 
 #### 2. Análise Técnica
 ```bash
-/engineer/start  # ID da task de bug
+/onion-engineer-start  # ID da task de bug
 ```
 
 **Análise específica para bugs**:
@@ -251,7 +251,7 @@ Após aprovação:
 
 #### 3. Implementação da Correção
 ```bash
-/engineer/work .claude/sessions/bug-dashboard-login/
+/onion-engineer-work .agents/onion/sessions/bug-dashboard-login/
 ```
 
 **Foco em**:
@@ -262,7 +262,7 @@ Após aprovação:
 
 #### 4. Validação Extensiva
 ```bash
-/engineer/pre-pr
+/onion-engineer-pre-pr
 ```
 
 **Validações específicas para bugs**:
@@ -277,7 +277,7 @@ Após aprovação:
 
 ### **Documentação Técnica**
 ```bash
-/docs/build-tech-docs
+/onion-docs-build-tech-docs
 ```
 
 **Produz**:
@@ -293,7 +293,7 @@ Após aprovação:
 
 ### **Documentação de Negócio**
 ```bash
-/docs/build-business-docs
+/onion-docs-build-business-docs
 ```
 
 **Produz**:
@@ -308,14 +308,14 @@ Após aprovação:
 
 ### **Planejamento de Refatoração**
 ```bash
-/product/task "Refatoração: Migrar sistema de cache para Redis"
-/product/light-arch  # Planejar nova arquitetura
+/onion-product-task "Refatoração: Migrar sistema de cache para Redis"
+/onion-product-light-arch  # Planejar nova arquitetura
 ```
 
 ### **Execução Incremental**
 ```bash
-/engineer/start  # Task de refatoração
-/engineer/work   # Implementação por fases
+/onion-engineer-start  # Task de refatoração
+/onion-engineer-work   # Implementação por fases
 ```
 
 **Características especiais**:
@@ -331,12 +331,12 @@ Após aprovação:
 ### **Hotfix Crítico (< 30min)**
 ```bash
 # Criação urgente
-/product/collect "CRÍTICO: Sistema de pagamento fora do ar"
+/onion-product-collect "CRÍTICO: Sistema de pagamento fora do ar"
 
 # Desenvolvimento express
-/engineer/start  # Branch hotfix/payment-fix
-/engineer/work "correção sistema pagamento"
-/engineer/pr     # PR de emergência
+/onion-engineer-start  # Branch hotfix/payment-fix
+/onion-engineer-work "correção sistema pagamento"
+/onion-engineer-pr     # PR de emergência
 
 # Provedor ativo: Task marcada como URGENT + notificações
 ```
@@ -375,9 +375,9 @@ Status normalizados: `backlog` → `todo` → `in_progress` → `in_review` → 
 
 | Comando | Estado Inicial | Estado Final | Tags/Labels Adicionadas |
 |---------|---------------|-------------|------------------|
-| `/product/task` | - | `todo` | Baseado no tipo |
-| `/engineer/start` | `todo` | `in_progress` | `development` |
-| `/engineer/pr` | `in_progress` | `in_progress` | `under-review` |
+| `/onion-product-task` | - | `todo` | Baseado no tipo |
+| `/onion-engineer-start` | `todo` | `in_progress` | `development` |
+| `/onion-engineer-pr` | `in_progress` | `in_progress` | `under-review` |
 | **Após merge** | `in_progress + under-review` | `done` | `completed` |
 | **Se bloqueado** | Qualquer | `blocked` | `blocked` + razão |
 
@@ -394,7 +394,7 @@ O conteúdo dos comentários é o mesmo em qualquer provedor; o **formato de ren
 | Bug encontrado | "🐛 Bug identificado durante desenvolvimento: [detalhes]" |
 
 **Formatação por provedor:**
-- _Específico do ClickUp:_ comentários usam formatação visual Unicode (`━━━`, `∟`, `▶`, `◆`, `✅`) com timestamp + status obrigatórios — ver `.claude/utils/task-manager/adapters/clickup.md`
+- _Específico do ClickUp:_ comentários usam formatação visual Unicode (`━━━`, `∟`, `▶`, `◆`, `✅`) com timestamp + status obrigatórios — ver `.agents/onion/utils/task-manager/adapters/clickup.md`
 - _Específico do Jira:_ comentários e descrições são enviados em ADF (JSON estruturado) — ver `adapters/jira.md`
 - _Asana:_ notes em HTML (subset) ou plain text — ver `adapters/asana.md`
 - _Linear:_ Markdown nativo (suporte rico) — ver `adapters/linear.md`
@@ -406,7 +406,7 @@ O mapeamento fase→subtask existe em todos os provedores, com nomenclatura pró
 | Provedor | Mecanismo |
 |----------|-----------|
 | **Jira** | Sub-tasks ou issue links |
-| **ClickUp** | Subtasks nativas (_específico do ClickUp:_ checklists nativos também são suportados via `/product/checklist-sync`) |
+| **ClickUp** | Subtasks nativas (_específico do ClickUp:_ checklists nativos também são suportados via `/onion-product-checklist-sync`) |
 | **Asana** | Subtasks |
 | **Linear** | Sub-issues |
 
@@ -416,10 +416,10 @@ O mapeamento fase→subtask existe em todos os provedores, com nomenclatura pró
 
 | Campo | Origem | Atualização |
 |-------|--------|-------------|
-| **Tempo Estimado** | `/product/task` análise | Refinado durante desenvolvimento |
-| **Tempo Real** | Timer automático | Durante `/engineer/work` |
-| **Branch** | `/engineer/start` | Nome da branch Git |
-| **PR Link** | `/engineer/pr` | Link direto do GitHub/GitLab |
+| **Tempo Estimado** | `/onion-product-task` análise | Refinado durante desenvolvimento |
+| **Tempo Real** | Timer automático | Durante `/onion-engineer-work` |
+| **Branch** | `/onion-engineer-start` | Nome da branch Git |
+| **PR Link** | `/onion-engineer-pr` | Link direto do GitHub/GitLab |
 | **Arquivos Alterados** | Análise Git | Lista de arquivos modificados |
 | **Linhas de Código** | Análise Git | Stats de adição/remoção |
 
@@ -453,11 +453,11 @@ O mapeamento fase→subtask existe em todos os provedores, com nomenclatura pró
 ## 💡 Melhores Práticas
 
 ### **Para Desenvolvimento Eficiente**
-1. ✅ **Sempre use `/product/task`** antes de começar desenvolvimento
-2. ✅ **Execute `/engineer/start`** para setup completo do ambiente
-3. ✅ **Trabalhe em sessões focadas** com `/engineer/work`
+1. ✅ **Sempre use `/onion-product-task`** antes de começar desenvolvimento
+2. ✅ **Execute `/onion-engineer-start`** para setup completo do ambiente
+3. ✅ **Trabalhe em sessões focadas** com `/onion-engineer-work`
 4. ✅ **Faça commits pequenos e frequentes** durante o desenvolvimento
-5. ✅ **Use `/engineer/pre-pr`** antes de submeter para review
+5. ✅ **Use `/onion-engineer-pre-pr`** antes de submeter para review
 
 ### **Para Integração com Task Manager Otimizada** (qualquer provedor)
 1. 🏷️ **Use tags/labels consistentes** para facilitar filtros e busca
@@ -476,21 +476,21 @@ O mapeamento fase→subtask existe em todos os provedores, com nomenclatura pró
 
 ---
 
-## 🤖 Workflows com Agentes Especializados
+## 🤖 Workflows com Specialists
 
 ### **Fluxo de Desenvolvimento Especializado por Tecnologia**
 
 #### **Node.js/Backend Development**
 ```bash
 # 1. Iniciar com agente especializado
-@nodejs-specialist "Implementar API REST com Express e TypeScript"
+spawn_agent → nodejs-specialist: "Implementar API REST com Express e TypeScript"
 
 # 2. Desenvolvimento focado
-/engineer/start 
+/onion-engineer-start 
 # → O sistema detecta contexto Node.js e sugere nodejs-specialist
 
 # 3. Review especializado
-@code-reviewer "Review de código Node.js com foco em performance"
+spawn_agent → code-reviewer: "Review de código Node.js com foco em performance"
 ```
 
 **Vantagens**:
@@ -502,12 +502,12 @@ O mapeamento fase→subtask existe em todos os provedores, com nomenclatura pró
 #### **Frontend/React Development**
 ```bash
 # Desenvolvimento React com agente especializado
-@react-developer "Criar componente de dashboard com hooks customizados"
+spawn_agent → react-developer: "Criar componente de dashboard com hooks customizados"
 
 # Seguindo o fluxo padrão mas com contexto React
-/engineer/start
-/engineer/work
-/engineer/pr
+/onion-engineer-start
+/onion-engineer-work
+/onion-engineer-pr
 ```
 
 **Recursos Exclusivos**:
@@ -521,10 +521,10 @@ O mapeamento fase→subtask existe em todos os provedores, com nomenclatura pró
 #### **C4 Architecture Modeling**
 ```bash
 # Para mudanças arquiteturais significativas
-@c4-architecture-specialist "Modelar arquitetura de microserviços"
+spawn_agent → c4-architecture-specialist: "Modelar arquitetura de microserviços"
 
 # Seguido por documentação especializada
-@c4-documentation-specialist "Documentar decisões arquiteturais"
+spawn_agent → c4-documentation-specialist: "Documentar decisões arquiteturais"
 ```
 
 **Entregáveis Automáticos**:
@@ -536,10 +536,10 @@ O mapeamento fase→subtask existe em todos os provedores, com nomenclatura pró
 #### **Mermaid Diagrams Workflow**
 ```bash
 # Para visualizações técnicas
-@mermaid-specialist "Criar fluxograma do processo de checkout"
+spawn_agent → mermaid-specialist: "Criar fluxograma do processo de checkout"
 
 # Integrado ao desenvolvimento
-/engineer/work "documentar fluxos com diagramas"
+/onion-engineer-work "documentar fluxos com diagramas"
 ```
 
 ### **Fluxo Git Avançado com Specialists**
@@ -547,12 +547,12 @@ O mapeamento fase→subtask existe em todos os provedores, com nomenclatura pró
 #### **GitFlow Specialist Workflow**
 ```bash
 # Para repositórios complexos
-@gitflow-specialist "Configurar strategy de branching para equipe"
+spawn_agent → gitflow-specialist: "Configurar strategy de branching para equipe"
 
 # Comandos especializados
-/git/release/start
-/git/hotfix/start
-/git/feature/finish
+/onion-git-release-start
+/onion-git-hotfix-start
+/onion-git-feature-finish
 ```
 
 #### **Task Manager Specialist Integration (específico do provedor ativo)**
@@ -561,29 +561,29 @@ O roteamento para o especialista depende de `TASK_MANAGER_PROVIDER`:
 
 ```bash
 # Jira (provider=jira)
-@jira-specialist "Configurar JQL, transitions e bulk operations"
+spawn_agent → jira-specialist: "Configurar JQL, transitions e bulk operations"
 
 # ClickUp (provider=clickup)
-@clickup-specialist "Configurar automações avançadas e custom fields"
+spawn_agent → clickup-specialist: "Configurar automações avançadas e custom fields"
 
 # Asana / Linear (provider=asana | linear)
-@task-specialist "Decompor e sincronizar tasks no provedor ativo"
+spawn_agent → task-specialist: "Decompor e sincronizar tasks no provedor ativo"
 
 # Melhoria técnica genérica (qualquer provedor)
-/engineer/work "otimizar sincronização com o Task Manager ativo"
+/onion-engineer-work "otimizar sincronização com o Task Manager ativo"
 ```
 
-> Estratégia/priorização → `@product-agent`; decomposição agnóstica → `@task-specialist`; operação técnica do provedor → especialista do provedor (`@jira-specialist`, `@clickup-specialist`).
+> Delegue via `spawn_agent`: estratégia/priorização → `product-agent`; decomposição agnóstica → `task-specialist`; operação técnica do provedor → specialist do provedor (`jira-specialist`, `clickup-specialist`).
 
-### **Coordenação Multi-Agente**
+### **Coordenação Multi-Specialist**
 
-#### **Exemplo: Feature Complexa com Múltiplos Agentes**
+#### **Exemplo: Feature Complexa com Múltiplos Specialists**
 ```bash
-# Sistema ativa automaticamente:
-# - @python-developer: Backend de pagamentos
-# - @react-developer: Interface de checkout  
-# - @test-engineer: Testes de integração
-# - @c4-architecture-specialist: Modelagem de segurança
+# A skill orquestradora dispara, via spawn_agent:
+# - python-developer: Backend de pagamentos
+# - react-developer: Interface de checkout
+# - test-engineer: Testes de integração
+# - c4-architecture-specialist: Modelagem de segurança
 ```
 
 **Fluxo Coordenado**:
@@ -595,4 +595,4 @@ O roteamento para o especialista depende de `TASK_MANAGER_PROVIDER`:
 
 ---
 
-**Próximo**: [Task Manager Abstraction →](../knowledge-base/concepts/task-manager-abstraction.md) · Adapters por provedor em `.claude/utils/task-manager/adapters/` (`jira.md`, `clickup.md`, `asana.md`, `linear.md`)
+**Próximo**: [Task Manager Abstraction →](../knowledge-base/concepts/task-manager-abstraction.md) · Adapters por provedor em `.agents/onion/utils/task-manager/adapters/` (`jira.md`, `clickup.md`, `asana.md`, `linear.md`)

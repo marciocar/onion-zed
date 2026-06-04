@@ -1,6 +1,6 @@
 # 📚 Índice - Sistema Onion
 
-> **Última atualização**: 2026-06-03 | **Gerado por**: `/docs:build-index onion` | **Revisado**: auditoria manual
+> **Última atualização**: 2026-06-03 | **Gerado por**: `/onion-docs-build-index onion` | **Revisado**: auditoria manual
 
 Bem-vindo ao índice da documentação do **Sistema Onion**. Este documento organiza os 11 documentos de documentação operacional do sistema em `docs/onion/`.
 
@@ -8,11 +8,11 @@ Bem-vindo ao índice da documentação do **Sistema Onion**. Este documento orga
 
 ## 🎯 Visão Geral
 
-O **Sistema Onion** é um **framework template em `.claude/`** — instalável em qualquer projeto (novo, legado ou regulado), plataforma única Claude Code, sem produto npm e sem CLI standalone. Inclui:
-- 🤖 **78 comandos invocáveis** Claude Code em 9 categorias
-- 🎯 **49 agentes de IA especializados** em 9 categorias
-- 🧩 **4 skills** em `.claude/skills/` (`onion`, `onion-patterns`, `onion-validation`, `language-standards`)
-- 🧅 **Skill + Comando `/onion`** — ponto de entrada inteligente
+O **Sistema Onion** é um **framework nativo do Zed** (em `.agents/` + `.zed/`) — instalável em qualquer projeto (novo, legado ou regulado), plataforma única Zed, sem produto npm e sem CLI standalone. Ver [ADR 0001](../meta-specs/adr/0001-zed-native-port.md). Inclui:
+- 🤖 **81 skills invocáveis** no Zed (`/onion-<categoria>-<comando>`) em 9 categorias
+- 🎯 **49 specialists de IA especializados** delegáveis via `spawn_agent`
+- 🧩 **Core skills** em `.agents/skills/` (`onion`, `onion-patterns`, `onion-validation`, `language-standards`)
+- 🧅 **Skill `/onion`** — ponto de entrada inteligente
 - 🔗 **Task Manager Abstraction** plugável (Jira, ClickUp, Asana, Linear)
 - 🏗️ **Spec as Code Multi-Context** — business, technical e meta-specs
 
@@ -21,9 +21,9 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
 ## 📊 Estatísticas
 
 - **11 documentos** em `docs/onion/`
-- **78 comandos invocáveis** Claude Code em `.claude/commands/`
-- **49 agentes** IA em `.claude/agents/`
-- **4 skills** em `.claude/skills/`
+- **81 skills invocáveis** no Zed em `.agents/skills/`
+- **49 specialists** de IA em `.agents/onion/specialists/`
+- **Core skills** em `.agents/skills/`
 
 ---
 
@@ -33,14 +33,14 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
 
 **Comece aqui se você é novo no Sistema Onion:**
 
-1. **[Guia de Comandos](commands-guide.md)** - Documentação dos comandos disponíveis
-   - 78 comandos invocáveis em 9 categorias
+1. **[Guia de Skills](commands-guide.md)** - Documentação das skills disponíveis
+   - 81 skills invocáveis em 9 categorias
    - Exemplos de uso e workflows
    - Integrações com Task Managers
 
-2. **[Referência de Agentes](agents-reference.md)** - Lista e descrição dos agentes especializados
-   - 49 agentes em 9 categorias
-   - Quando usar cada agente
+2. **[Referência de Specialists](agents-reference.md)** - Lista e descrição dos specialists especializados
+   - 49 specialists em 9 categorias
+   - Quando delegar a cada specialist via `spawn_agent`
    - Capacidades e especializações
 
 3. **[Fluxos de Engenharia](engineering-flows.md)** - Workflows detalhados para desenvolvimento
@@ -50,7 +50,7 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
    - Integração com Task Manager por fluxo
 
 4. **[Sistema de Testes e Validação](testing-validation-system.md)** - Framework completo de testes e validação
-   - 4 camadas integradas (Knowledge Base, Agentes, Comandos de Teste, Comandos de Validação)
+   - 4 camadas integradas (Knowledge Base, Specialists, Skills de Teste, Skills de Validação)
    - White-box, Grey-box, Black-box
    - QA Story Points
 
@@ -63,7 +63,7 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
    - Configuração de integrações
    - Workflows básicos
 
-2. **Task Manager Abstraction** — configure provider (Jira/ClickUp/Asana/Linear) via `.env` e `/meta:setup-integration`. Adapters técnicos em [`.claude/utils/task-manager/adapters/`](../../.claude/utils/task-manager/adapters/).
+2. **Task Manager Abstraction** — configure provider (Jira/ClickUp/Asana/Linear) via `.env` e `/onion-meta-setup-integration`. Adapters técnicos em [`.agents/onion/utils/task-manager/adapters/`](../../.agents/onion/utils/task-manager/adapters/).
 
 3. **Aplicação em projetos-alvo** — ver guias em [`docs/applying/`](../applying/) (greenfield, legado, regulado).
 
@@ -76,12 +76,12 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
    - Cenários de uso
    - Melhores práticas
 
-2. **[Referência de Ferramentas](tools-reference.md)** - Todas as ferramentas disponíveis
-   - Ferramentas integradas
-   - Configuração
+2. **[Referência de Ferramentas](tools-reference.md)** - Todas as ferramentas nativas do Zed disponíveis
+   - Ferramentas integradas (`read_file`, `edit_file`, `terminal`, `spawn_agent`, ...)
+   - MCP via `context_servers`
    - Uso e exemplos
 
-3. **[Arquitetura de Comandos](claude-code-commands-architecture.md)** - Estrutura interna dos comandos
+3. **[Arquitetura de Comandos (legado)](claude-code-commands-architecture.md)** - Estrutura interna (doc legado em revisão para Zed)
    - Padrões de design
    - Estrutura de arquivos
    - Best practices
@@ -117,28 +117,28 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
 
 #### 👨‍💻 Desenvolvedores
 - Comece com: [Getting Started](getting-started.md)
-- Aprenda: [Commands Guide](commands-guide.md)
+- Aprenda: [Skills Guide](commands-guide.md)
 - Explore: [Engineering Flows](engineering-flows.md)
 - Teste: [Testing Validation System](testing-validation-system.md)
 
 #### 📋 Product Owners
-- Comece com: [Commands Guide](commands-guide.md) - Seção Produto
+- Comece com: [Skills Guide](commands-guide.md) - Seção Produto
 - Aprenda: [Practical Examples](practical-examples.md)
-- Explore: [Agents Reference](agents-reference.md)
+- Explore: [Specialists Reference](agents-reference.md)
 
 #### 🧪 QA/Test Engineers
 - Comece com: [Testing Validation System](testing-validation-system.md)
 - Aprenda: [End-to-End Validation Tests](end-to-end-validation-tests.md)
-- Explore: [Agents Reference](agents-reference.md) - Seção Testing
+- Explore: [Specialists Reference](agents-reference.md) - Seção Testing
 
 #### 🏗️ Arquitetos
-- Comece com: [Claude Code Commands Architecture](claude-code-commands-architecture.md)
+- Comece com: [Arquitetura de Comandos (legado)](claude-code-commands-architecture.md)
 - Explore: [Engineering Flows](engineering-flows.md)
 
 #### 🔧 Administradores
 - Comece com: [Getting Started](getting-started.md)
 - Aplique em projetos: [`docs/applying/`](../applying/)
-- Configure Task Manager: `/meta:setup-integration` (adapters em `.claude/utils/task-manager/adapters/`)
+- Configure Task Manager: `/onion-meta-setup-integration` (adapters em `.agents/onion/utils/task-manager/adapters/`)
 
 ---
 
@@ -147,8 +147,8 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
 ### Documentação Essencial
 - [README Principal](../../README.md) - Visão geral do Sistema Onion
 - [Índice Central](../INDEX.md) - Hub de navegação completo
-- [Guia de Comandos](commands-guide.md) - Todos os comandos
-- [Referência de Agentes](agents-reference.md) - Todos os agentes
+- [Guia de Skills](commands-guide.md) - Todas as skills
+- [Referência de Specialists](agents-reference.md) - Todos os specialists
 
 ### Knowledge Bases Relacionadas
 - [Task Manager Abstraction](../knowledge-base/concepts/task-manager-abstraction.md)
@@ -158,7 +158,7 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
 
 ### Configuração
 - [Getting Started](getting-started.md)
-- [Adapters de Task Manager](../../.claude/utils/task-manager/adapters/)
+- [Adapters de Task Manager](../../.agents/onion/utils/task-manager/adapters/)
 
 ---
 
@@ -166,8 +166,9 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
 
 | Data | Mudança |
 |------|---------|
-| 2026-06-03 | Limpeza: removidos 14 docs obsoletos do v4.0/CLI abandonado; índice realinhado à identidade atual (78 comandos / 49 agentes / 4 skills) |
-| 2026-05-15 | Auditoria manual: agente @onion corrigido (agentes fantasmas removidos, 18 novos adicionados) |
+| 2026-06-03 | Port nativo Zed (ADR 0001): comandos→skills `/onion-cat-cmd`, agentes→specialists via `spawn_agent`, `CLAUDE.md`→`AGENTS.md`; índice realinhado (81 skills / 49 specialists) |
+| 2026-06-03 | Limpeza: removidos 14 docs obsoletos do v4.0/CLI abandonado |
+| 2026-05-15 | Auditoria manual: specialist onion corrigido (specialists fantasmas removidos, 18 novos adicionados) |
 | 2025-12-20 | Índice reconstruído |
 | 2025-12-02 | Adicionado Spec-Driven Development |
 
@@ -175,12 +176,12 @@ O **Sistema Onion** é um **framework template em `.claude/`** — instalável e
 
 ## 🔄 Manutenção
 
-Este índice é gerado pelo comando `/docs:build-index onion`.
+Este índice é gerado pela skill `/onion-docs-build-index onion`.
 
 **Para atualizar:**
 ```bash
-/docs:build-index onion        # Reconstruir este índice
-/docs:build-index              # Reconstruir índice principal
+/onion-docs-build-index onion        # Reconstruir este índice
+/onion-docs-build-index              # Reconstruir índice principal
 ```
 
 ---

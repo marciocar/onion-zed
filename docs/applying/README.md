@@ -6,7 +6,7 @@
 
 ## Visão geral
 
-O Sistema Onion é um **framework template** que se materializa em cada projeto-alvo. Estes guias cobrem os três cenários principais de aplicação:
+O Sistema Onion é um **framework nativo do Zed** (em `.agents/` + `.zed/`) que se materializa em cada projeto-alvo. Ver [ADR 0001](../meta-specs/adr/0001-zed-native-port.md). Estes guias cobrem os três cenários principais de aplicação:
 
 | Cenário | Guia | Quando usar |
 |---|---|---|
@@ -17,19 +17,20 @@ O Sistema Onion é um **framework template** que se materializa em cada projeto-
 Cada guia documenta:
 
 - Pré-requisitos
-- Passo a passo desde clone/init até primeiro comando útil
+- Passo a passo desde clone/init até primeira skill útil
 - Decisão sobre quais dos três contextos spec-as-code ativar (business, technical, compliance)
-- Comandos específicos do cenário
+- Skills específicas do cenário
 - Troubleshooting
 
 ---
 
 ## Pré-requisitos comuns a todos os cenários
 
-1. **Claude Code instalado** — plataforma única do Onion
+1. **Zed instalado** — plataforma única do Onion (ver instalação em [applying-greenfield.md](./applying-greenfield.md))
 2. **Git** instalado e funcional
-3. **Acesso ao repositório do Onion** (este repositório) para copiar `.claude/` e estrutura `docs/`
-4. **Conta em pelo menos um Task Manager** (Jira, ClickUp, Asana ou Linear) se o projeto usar tasks
+3. **Acesso ao repositório do Onion** (este repositório) para copiar `.agents/`, `.zed/settings.json`, `AGENTS.md` e estrutura `docs/`
+4. **Worktree trust** habilitado no Zed para o projeto-alvo (necessário para descobrir skills locais em `.agents/skills/` e os `context_servers`)
+5. **Conta em pelo menos um Task Manager** (Jira, ClickUp, Asana ou Linear) se o projeto usar tasks
 
 ---
 
@@ -49,4 +50,4 @@ Projetos podem combinar cenários (ex: greenfield em setor regulado segue greenf
 
 ---
 
-**Próximo passo**: abrir o guia correspondente ao seu cenário.
+**Próximo passo**: abrir o guia correspondente ao seu cenário. A instalação base (`.agents/` + `.zed/settings.json` + `AGENTS.md` + worktree trust) é detalhada em [applying-greenfield.md](./applying-greenfield.md).

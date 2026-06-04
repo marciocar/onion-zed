@@ -1,8 +1,8 @@
 # 🧪 Sistema Integrado de Testes e Validação
 
-> **Versão**: 3.0.0 | **Última atualização**: 2025-12-02
+> **Última atualização**: 2026-06-03 | **Plataforma**: Zed (ver [ADR 0001](../meta-specs/adr/0001-zed-native-port.md))
 
-Documentação completa do conjunto integrado de comandos, agentes e knowledge bases para testes e validação no Sistema Onion.
+Documentação completa do conjunto integrado de skills, specialists e knowledge bases para testes e validação no Sistema Onion (nativo Zed).
 
 ---
 
@@ -17,27 +17,27 @@ O Sistema de Testes e Validação é composto por **4 camadas integradas** que t
 └─────────────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  🤖 AGENTES ESPECIALIZADOS (3 agentes)                      │
-│  ├─ @test-agent - Estratégias completas                    │
-│  ├─ @test-engineer - Implementação prática                 │
-│  └─ @test-planner - Planejamento e cobertura               │
+│  🤖 SPECIALISTS (3 personas, via spawn_agent)              │
+│  ├─ test-agent - Estratégias completas                     │
+│  ├─ test-engineer - Implementação prática                  │
+│  └─ test-planner - Planejamento e cobertura                │
 └─────────────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  🔧 COMANDOS DE TESTE (3 comandos)                          │
-│  ├─ /test/unit - Testes unitários                          │
-│  ├─ /test/integration - Testes de integração               │
-│  └─ /test/e2e - Testes end-to-end                         │
+│  🔧 SKILLS DE TESTE (3 skills)                              │
+│  ├─ /onion-test-unit - Testes unitários                    │
+│  ├─ /onion-test-integration - Testes de integração         │
+│  └─ /onion-test-e2e - Testes end-to-end                    │
 └─────────────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  ✅ COMANDOS DE VALIDAÇÃO (6 comandos)                       │
-│  ├─ /validate/workflow - Validação de workflows           │
-│  ├─ /validate/test-strategy/create - Criar estratégias    │
-│  ├─ /validate/test-strategy/analyze - Analisar estratégias│
-│  ├─ /validate/qa-points/estimate - Estimar QA points     │
-│  ├─ /validate/collab/three-amigos - Sessões colaborativas│
-│  └─ /validate/collab/pair-testing - Teste em par          │
+│  ✅ SKILLS DE VALIDAÇÃO (6 skills)                           │
+│  ├─ /onion-validate-workflow - Validação de workflows      │
+│  ├─ /onion-validate-test-strategy-create - Criar estratégias│
+│  ├─ /onion-validate-test-strategy-analyze - Analisar       │
+│  ├─ /onion-validate-qa-points-estimate - Estimar QA points │
+│  ├─ /onion-validate-collab-three-amigos - Sessões colab.   │
+│  └─ /onion-validate-collab-pair-testing - Teste em par     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -99,15 +99,15 @@ Escala:
 - **Grey-box**: Contract Testing, Fuzzing, Load/Stress Testing
 
 **Como é usado**:
-- Todos os comandos e agentes consultam este framework antes de executar
+- Todas as skills e specialists consultam este framework antes de executar
 - Garante consistência em todas as estimativas e estratégias
 - Base para templates e checklists
 
 ---
 
-## 🤖 Camada 2: Agentes Especializados
+## 🤖 Camada 2: Specialists
 
-### 1. **@test-agent** - Estrategista Completo
+### 1. **test-agent** (via `spawn_agent`) - Estrategista Completo
 
 **Responsabilidades**:
 - ✅ Domínio total do Framework de Testes
@@ -124,10 +124,10 @@ Escala:
 
 **Exemplo de uso**:
 ```bash
-@test-agent "Criar estratégia completa de testes para feature de checkout"
+spawn_agent → test-agent: "Criar estratégia completa de testes para feature de checkout"
 ```
 
-### 2. **@test-engineer** - Implementador Prático
+### 2. **test-engineer** (via `spawn_agent`) - Implementador Prático
 
 **Responsabilidades**:
 - ✅ Escrever testes unitários práticos
@@ -142,10 +142,10 @@ Escala:
 
 **Exemplo de uso**:
 ```bash
-@test-engineer "Criar testes unitários para UserService.validateEmail()"
+spawn_agent → test-engineer: "Criar testes unitários para UserService.validateEmail()"
 ```
 
-### 3. **@test-planner** - Planejador e Analista
+### 3. **test-planner** (via `spawn_agent`) - Planejador e Analista
 
 **Responsabilidades**:
 - ✅ Análise sistemática da base de código
@@ -160,14 +160,14 @@ Escala:
 
 **Exemplo de uso**:
 ```bash
-@test-planner "Analisar cobertura de testes e recomendar melhorias"
+spawn_agent → test-planner: "Analisar cobertura de testes e recomendar melhorias"
 ```
 
 ---
 
-## 🔧 Camada 3: Comandos de Teste
+## 🔧 Camada 3: Skills de Teste
 
-### 1. **`/test/unit`** - Testes Unitários (White-box)
+### 1. **`/onion-test-unit`** - Testes Unitários (White-box)
 
 **Funcionalidades**:
 - Auto-detecção de framework (Jest, Vitest, PyTest, JUnit)
@@ -177,20 +177,20 @@ Escala:
 
 **Parâmetros**:
 ```bash
-/test/unit <file-path> [--generate] [--run] [--coverage] [--watch] [--framework]
+/onion-test-unit <file-path> [--generate] [--run] [--coverage] [--watch] [--framework]
 ```
 
 **Exemplo**:
 ```bash
-/test/unit src/services/UserService.ts --generate --run --coverage
+/onion-test-unit src/services/UserService.ts --generate --run --coverage
 ```
 
 **Integração**:
 - Usa `framework_testes.md` para padrões White-box
-- Integra com `@test-engineer` para validação
+- Integra com `test-engineer` para validação
 - Gera testes seguindo padrão AAA (Arrange, Act, Assert)
 
-### 2. **`/test/integration`** - Testes de Integração (Grey-box)
+### 2. **`/onion-test-integration`** - Testes de Integração (Grey-box)
 
 **Funcionalidades**:
 - Auto-detecção de framework (Supertest, Pact, Postman)
@@ -200,12 +200,12 @@ Escala:
 
 **Parâmetros**:
 ```bash
-/test/integration <api-endpoint> [--generate] [--run] [--contract] [--boundary] [--fuzz] [--framework]
+/onion-test-integration <api-endpoint> [--generate] [--run] [--contract] [--boundary] [--fuzz] [--framework]
 ```
 
 **Exemplo**:
 ```bash
-/test/integration /api/users --generate --run --contract --boundary
+/onion-test-integration /api/users --generate --run --contract --boundary
 ```
 
 **Integração**:
@@ -213,7 +213,7 @@ Escala:
 - Foca em contratos de API e integrações
 - Valida tratamento de erros e limites
 
-### 3. **`/test/e2e`** - Testes End-to-End (Black-box)
+### 3. **`/onion-test-e2e`** - Testes End-to-End (Black-box)
 
 **Funcionalidades**:
 - Auto-detecção de framework (Cypress, Playwright, Selenium)
@@ -223,12 +223,12 @@ Escala:
 
 **Parâmetros**:
 ```bash
-/test/e2e <feature-name> [--generate] [--run] [--headless] [--record] [--framework]
+/onion-test-e2e <feature-name> [--generate] [--run] [--headless] [--record] [--framework]
 ```
 
 **Exemplo**:
 ```bash
-/test/e2e login --generate --run --record
+/onion-test-e2e login --generate --run --record
 ```
 
 **Integração**:
@@ -238,9 +238,9 @@ Escala:
 
 ---
 
-## ✅ Camada 4: Comandos de Validação
+## ✅ Camada 4: Skills de Validação
 
-### 1. **`/validate/workflow`** - Validação de Workflows
+### 1. **`/onion-validate-workflow`** - Validação de Workflows
 
 **Funcionalidades**:
 - Validação de sincronização Git (local vs remoto)
@@ -252,12 +252,12 @@ Escala:
 
 **Parâmetros**:
 ```bash
-/validate/workflow [pr-merge|cleanup|development|complete]
+/onion-validate-workflow [pr-merge|cleanup|development|complete]
 ```
 
 **Exemplo**:
 ```bash
-/validate/workflow pr-merge
+/onion-validate-workflow pr-merge
 ```
 
 **Output**:
@@ -265,7 +265,7 @@ Escala:
 - Estatísticas detalhadas
 - Ações recomendadas/obrigatórias
 
-### 2. **`/validate/test-strategy/create`** - Criar Estratégia de Teste
+### 2. **`/onion-validate-test-strategy-create`** - Criar Estratégia de Teste
 
 **Funcionalidades**:
 - Cria estratégias completas baseadas no Framework
@@ -276,20 +276,20 @@ Escala:
 
 **Parâmetros**:
 ```bash
-/validate/test-strategy/create <feature-name> [--risk-level] [--complexity] [--task-manager] [--project-id] [--dry-run]
+/onion-validate-test-strategy-create <feature-name> [--risk-level] [--complexity] [--task-manager] [--project-id] [--dry-run]
 ```
 
 **Exemplo**:
 ```bash
-/validate/test-strategy/create checkout --risk-level alto --complexity complexo
+/onion-validate-test-strategy-create checkout --risk-level alto --complexity complexo
 ```
 
 **Integração**:
 - **OBRIGATORIAMENTE** lê `framework_testes.md` antes de executar
-- Usa `@test-agent` para validação de estratégia
+- Usa `test-agent` para validação de estratégia
 - Cria tasks no task manager com QA points calculados
 
-### 3. **`/validate/test-strategy/analyze`** - Analisar Estratégia
+### 3. **`/onion-validate-test-strategy-analyze`** - Analisar Estratégia
 
 **Funcionalidades**:
 - Análise de estratégias existentes
@@ -299,10 +299,10 @@ Escala:
 
 **Parâmetros**:
 ```bash
-/validate/test-strategy/analyze <feature-name> [--output-format]
+/onion-validate-test-strategy-analyze <feature-name> [--output-format]
 ```
 
-### 4. **`/validate/qa-points/estimate`** - Estimar QA Story Points
+### 4. **`/onion-validate-qa-points-estimate`** - Estimar QA Story Points
 
 **Funcionalidades**:
 - Cálculo preciso usando fórmula do Framework
@@ -313,12 +313,12 @@ Escala:
 
 **Parâmetros**:
 ```bash
-/validate/qa-points/estimate "<task-description>" [--complexity] [--risk] [--type] [--task-id] [--update] [--breakdown] [--suggest-techniques]
+/onion-validate-qa-points-estimate "<task-description>" [--complexity] [--risk] [--type] [--task-id] [--update] [--breakdown] [--suggest-techniques]
 ```
 
 **Exemplo**:
 ```bash
-/validate/qa-points/estimate "Testar fluxo completo de checkout com múltiplos métodos de pagamento" --breakdown --suggest-techniques
+/onion-validate-qa-points-estimate "Testar fluxo completo de checkout com múltiplos métodos de pagamento" --breakdown --suggest-techniques
 ```
 
 **Integração**:
@@ -326,7 +326,7 @@ Escala:
 - Usa análise contextual para auto-detectar complexidade/risco
 - Pode atualizar task manager automaticamente
 
-### 5. **`/validate/collab/three-amigos`** - Sessão Three Amigos
+### 5. **`/onion-validate-collab-three-amigos`** - Sessão Three Amigos
 
 **Funcionalidades**:
 - Facilita sessões PO + Developer + QA
@@ -337,12 +337,12 @@ Escala:
 
 **Parâmetros**:
 ```bash
-/validate/collab/three-amigos <story_id> [--task-manager] [--generate-agenda]
+/onion-validate-collab-three-amigos <story_id> [--task-manager] [--generate-agenda]
 ```
 
 **Exemplo**:
 ```bash
-/validate/collab/three-amigos CU-123 --generate-agenda
+/onion-validate-collab-three-amigos CU-123 --generate-agenda
 ```
 
 **Outputs**:
@@ -353,7 +353,7 @@ Escala:
 - Test strategy definida
 - Definition of Done acordada
 
-### 6. **`/validate/collab/pair-testing`** - Teste em Par
+### 6. **`/onion-validate-collab-pair-testing`** - Teste em Par
 
 **Funcionalidades**:
 - Facilita sessões de teste em par
@@ -363,7 +363,7 @@ Escala:
 
 **Parâmetros**:
 ```bash
-/validate/collab/pair-testing <feature-name> [--pair-type] [--duration]
+/onion-validate-collab-pair-testing <feature-name> [--pair-type] [--duration]
 ```
 
 ---
@@ -373,47 +373,47 @@ Escala:
 ### Fluxo 1: Desenvolvimento Completo com Testes
 
 ```
-1. /product/task "Criar feature de checkout"
+1. /onion-product-task "Criar feature de checkout"
    ↓
-2. /validate/collab/three-amigos CU-123
+2. /onion-validate-collab-three-amigos CU-123
    → Estima Dev points + QA points
    → Define test strategy
    ↓
-3. /engineer/start checkout
+3. /onion-engineer-start checkout
    ↓
-4. /test/unit src/services/CheckoutService.ts --generate --run
+4. /onion-test-unit src/services/CheckoutService.ts --generate --run
    → Testes White-box (desenvolvedor)
    ↓
-5. /test/integration /api/checkout --generate --run --contract
+5. /onion-test-integration /api/checkout --generate --run --contract
    → Testes Grey-box (cross-dev)
    ↓
-6. /test/e2e checkout --generate --run
+6. /onion-test-e2e checkout --generate --run
    → Testes Black-box (QA)
    ↓
-7. /validate/workflow pr-merge
+7. /onion-validate-workflow pr-merge
    → Validação final antes de PR
 ```
 
 ### Fluxo 2: Criação de Estratégia Completa
 
 ```
-1. /validate/test-strategy/create checkout --risk-level alto
+1. /onion-validate-test-strategy-create checkout --risk-level alto
    → Lê framework_testes.md
    → Calcula QA points automaticamente
    → Cria épico no ClickUp com subtasks
    ↓
-2. @test-agent "Validar estratégia criada"
+2. spawn_agent → test-agent: "Validar estratégia criada"
    → Revisa conformidade com framework
    → Sugere melhorias
    ↓
-3. /validate/test-strategy/analyze checkout
+3. /onion-validate-test-strategy-analyze checkout
    → Analisa gaps e oportunidades
 ```
 
 ### Fluxo 3: Estimativa Precisa de QA
 
 ```
-1. /validate/qa-points/estimate "Testar sistema de pagamentos" --breakdown
+1. /onion-validate-qa-points-estimate "Testar sistema de pagamentos" --breakdown
    → Lê framework_testes.md
    → Analisa contexto
    → Calcula: Complexidade (8) + Risco (5) + Tipo (4) = 17 pontos
@@ -422,7 +422,7 @@ Escala:
      - Grey-box: 5 pontos (integration)
      - Black-box: 9 pontos (E2E + exploratório)
    ↓
-2. /validate/qa-points/estimate --task-id CU-456 --update
+2. /onion-validate-qa-points-estimate --task-id CU-456 --update
    → Atualiza task no ClickUp com 17 QA points
 ```
 
@@ -475,39 +475,39 @@ Escala:
 ### Para Desenvolvedores
 
 **Durante desenvolvimento**:
-- `/test/unit` - Criar testes unitários
-- `@test-engineer` - Validar qualidade dos testes
+- `/onion-test-unit` - Criar testes unitários
+- `test-engineer` - Validar qualidade dos testes
 
 **Antes de PR**:
-- `/test/integration` - Testar integrações
-- `/validate/workflow` - Validar workflow completo
+- `/onion-test-integration` - Testar integrações
+- `/onion-validate-workflow` - Validar workflow completo
 
 ### Para QA
 
 **Planejamento**:
-- `/validate/qa-points/estimate` - Estimar esforço
-- `/validate/test-strategy/create` - Criar estratégia completa
-- `@test-planner` - Analisar cobertura
+- `/onion-validate-qa-points-estimate` - Estimar esforço
+- `/onion-validate-test-strategy-create` - Criar estratégia completa
+- `test-planner` - Analisar cobertura
 
 **Execução**:
-- `/test/e2e` - Testes end-to-end
-- `/validate/collab/pair-testing` - Sessões colaborativas
+- `/onion-test-e2e` - Testes end-to-end
+- `/onion-validate-collab-pair-testing` - Sessões colaborativas
 
 ### Para Product Owners
 
 **Refinement**:
-- `/validate/collab/three-amigos` - Sessões de refinement
-- `/validate/qa-points/estimate` - Entender esforço de teste
+- `/onion-validate-collab-three-amigos` - Sessões de refinement
+- `/onion-validate-qa-points-estimate` - Entender esforço de teste
 
 ### Para Times Cross-funcionais
 
 **Estratégia**:
-- `@test-agent` - Criar estratégias completas
-- `/validate/test-strategy/create` - Estratégias automatizadas
+- `test-agent` - Criar estratégias completas
+- `/onion-validate-test-strategy-create` - Estratégias automatizadas
 
 **Colaboração**:
-- `/validate/collab/three-amigos` - Alinhamento de times
-- `/validate/collab/pair-testing` - Transferência de conhecimento
+- `/onion-validate-collab-three-amigos` - Alinhamento de times
+- `/onion-validate-collab-pair-testing` - Transferência de conhecimento
 
 ---
 
@@ -515,10 +515,10 @@ Escala:
 
 ### Task Managers
 
-Todos os comandos de validação integram com:
-- **ClickUp** (via MCP)
-- **Asana** (via MCP)
-- **Linear** (via adapter)
+Todas as skills de validação integram com (conforme `TASK_MANAGER_PROVIDER`):
+- **ClickUp** (via MCP standalone declarado em `.zed/settings.json` → `context_servers`)
+- **Jira** (via REST direto com `fetch`/`terminal`)
+- **Asana / Linear** (via adapter)
 
 **Funcionalidades**:
 - Criar tasks/epics automaticamente
@@ -528,7 +528,7 @@ Todos os comandos de validação integram com:
 
 ### CI/CD
 
-Comandos de teste geram:
+Skills de teste geram:
 - Configurações de pipeline
 - Quality gates
 - Relatórios de coverage
@@ -542,17 +542,17 @@ Comandos de teste geram:
 - [`framework_testes.md`](../knowledge-base/frameworks/framework_testes.md) - Framework completo
 - [`framework_story_points.md`](../knowledge-base/frameworks/framework_story_points.md) - Sistema de estimativas
 
-### Comandos Relacionados
-- `/product/task` - Criar tasks
-- `/product/estimate` - Estimar story points de desenvolvimento
-- `/engineer/start` - Iniciar desenvolvimento
-- `/engineer/work` - Trabalhar em task
-- `/engineer/pr` - Criar Pull Request
+### Skills Relacionadas
+- `/onion-product-task` - Criar tasks
+- `/onion-product-estimate` - Estimar story points de desenvolvimento
+- `/onion-engineer-start` - Iniciar desenvolvimento
+- `/onion-engineer-work` - Trabalhar em task
+- `/onion-engineer-pr` - Criar Pull Request
 
-### Agentes Relacionados
-- `@product-agent` - Orquestração de produto
-- `@code-reviewer` - Review de código
-- `@onion` - Orquestrador master
+### Specialists Relacionados (via `spawn_agent`)
+- `product-agent` - Orquestração de produto
+- `code-reviewer` - Review de código
+- `onion` - Orquestrador master (também exposto como skill `onion`)
 
 ---
 
@@ -568,34 +568,34 @@ Comandos de teste geram:
 
 2. **Criar Primeira Estratégia**:
    ```bash
-   /validate/test-strategy/create minha-feature --risk-level médio
+   /onion-validate-test-strategy-create minha-feature --risk-level médio
    ```
 
 3. **Estimar QA Points**:
    ```bash
-   /validate/qa-points/estimate "Testar feature X" --breakdown
+   /onion-validate-qa-points-estimate "Testar feature X" --breakdown
    ```
 
 ### Uso Diário
 
 **Desenvolvedor**:
 ```bash
-/test/unit src/services/MyService.ts --generate --run --coverage
+/onion-test-unit src/services/MyService.ts --generate --run --coverage
 ```
 
 **QA**:
 ```bash
-/test/e2e login --generate --run --record
+/onion-test-e2e login --generate --run --record
 ```
 
 **Time**:
 ```bash
-/validate/collab/three-amigos CU-123 --generate-agenda
+/onion-validate-collab-three-amigos CU-123 --generate-agenda
 ```
 
 ---
 
-**Responsável**: Sistema Onion v3.0  
-**Última Atualização**: 2025-12-02  
-**Mantido por**: Comando `/docs/build-index`
+**Responsável**: Sistema Onion (nativo Zed)  
+**Última Atualização**: 2026-06-03  
+**Mantido por**: Skill `/onion-docs-build-index`
 

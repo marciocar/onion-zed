@@ -1,46 +1,57 @@
-# 🚀 Guia de Início Rápido
+# 🚀 Guia de Início Rápido (nativo Zed)
 
-> **Versão**: 3.0.0 | **Última atualização**: 2025-12-02
+> **Última atualização**: 2026-06-03 | **Plataforma**: Zed (ver [ADR 0001](../meta-specs/adr/0001-zed-native-port.md))
 
-Bem-vindo ao sistema Onion v3.0! Este guia vai te ajudar a começar rapidamente com os comandos `.claude/` e integração com gerenciadores de tarefas através do **Task Manager Abstraction**.
+Bem-vindo ao Sistema Onion! Este guia vai te ajudar a começar rapidamente com as skills em `.agents/skills/`, os specialists em `.agents/onion/specialists/` e a integração com gerenciadores de tarefas através do **Task Manager Abstraction**.
 
-## 📊 Visão Geral v3.0
+## 📊 Visão Geral
 
 | Componente | Quantidade | Descrição |
 |------------|------------|-----------|
-| Comandos | 56 | Organizados em 8 categorias |
-| Agentes | 38 | 9 categorias especializadas |
-| Regras | 4 | Padrões e validações |
-| Knowledge Bases | 5 | Documentação estruturada |
+| Skills | 81 | `/onion-<categoria>-<comando>`, catálogo flat em `.agents/skills/` |
+| Specialists | 49 | personas em `.agents/onion/specialists/`, delegadas via `spawn_agent` |
+| Rules | `AGENTS.md` | regras lidas nativamente pelo Zed |
+| Config | `.zed/settings.json` | `agent.tool_permissions` + `context_servers` (MCP) |
+| Knowledge Bases | — | Documentação estruturada em `docs/knowledge-base/` |
+
+## 🧩 Instalar e preparar o Zed
+
+1. **Instale o Zed** — baixe em https://zed.dev/download (em Linux/macOS: `curl -f https://zed.dev/install.sh | sh`).
+2. **Configure um provedor de LLM** — abra o **Agent Panel** do Zed e configure ao menos um provider (Anthropic, OpenAI, ou via `claude-acp`/Zed AI). Sem provider, skills e `spawn_agent` não executam.
+3. **Abra o projeto que contém o Onion** (com `.agents/`, `.zed/settings.json` e `AGENTS.md` na raiz).
+4. **Conceda o worktree trust** — ao abrir o projeto, o Zed pede confiança na worktree. **É obrigatório**: sem ele o Zed **não descobre** as skills locais em `.agents/skills/` nem inicializa os `context_servers` (MCPs) declarados em `.zed/settings.json`.
+
+> A instalação do framework em um projeto-alvo (copiar `.agents/` + `.zed/settings.json` + `AGENTS.md`) está detalhada em [`docs/applying/`](../applying/).
 
 ## 📋 Checklist de Setup
 
 ### **✅ Pré-requisitos**
-- [ ] **Node.js v22.14.0+** instalado
-- [ ] Claude Code instalado e configurado
+- [ ] **Zed** instalado
+- [ ] **Provedor de LLM** configurado no Agent Panel do Zed
+- [ ] **Worktree trust** concedido ao projeto
 - [ ] Git inicializado no projeto
-- [ ] Pasta `.claude/` presente no projeto
+- [ ] `.agents/`, `.zed/settings.json` e `AGENTS.md` presentes no projeto
 
 ### **✅ Configuração de Integrações**
 
-#### **⚙️ Método Recomendado: Comando `/meta/setup-integration`**
+#### **⚙️ Método Recomendado: Skill `/onion-meta-setup-integration`**
 
-O Sistema Onion oferece um comando interativo para configurar todas as integrações de forma segura:
+O Sistema Onion oferece uma skill interativa para configurar todas as integrações de forma segura:
 
 ```bash
 # Configuração interativa (recomendado)
-/meta/setup-integration
+/onion-meta-setup-integration
 
 # Ou especificar integração diretamente
-/meta/setup-integration task-manager  # Configurar gerenciador de tarefas
-/meta/setup-integration jira          # Configurar Jira especificamente
-/meta/setup-integration clickup       # Configurar ClickUp especificamente
-/meta/setup-integration asana         # Configurar Asana especificamente
-/meta/setup-integration linear        # Configurar Linear especificamente
-/meta/setup-integration gamma         # Configurar Gamma.App
+/onion-meta-setup-integration task-manager  # Configurar gerenciador de tarefas
+/onion-meta-setup-integration jira          # Configurar Jira especificamente
+/onion-meta-setup-integration clickup       # Configurar ClickUp especificamente
+/onion-meta-setup-integration asana         # Configurar Asana especificamente
+/onion-meta-setup-integration linear        # Configurar Linear especificamente
+/onion-meta-setup-integration gamma         # Configurar Gamma.App
 ```
 
-**O que o comando faz:**
+**O que a skill faz:**
 - ✅ **Guia passo a passo** na configuração de cada integração
 - ✅ **Cria/atualiza `.env`** automaticamente
 - ✅ **Valida segurança** (verifica `.gitignore`, protege credenciais)
@@ -98,28 +109,28 @@ GAMMA_API_KEY=gm_xxxxx
 > bloco correspondente e comente o anterior. Nenhum comando ou workflow precisa
 > mudar — a abstração resolve o roteamento.
 
-> **💡 Dica:** Use `/meta/setup-integration` para garantir que todas as variáveis estão corretas e o `.env` está protegido no `.gitignore`.
+> **💡 Dica:** Use `/onion-meta-setup-integration` para garantir que todas as variáveis estão corretas e o `.env` está protegido no `.gitignore`.
 
 > **Referência**: Veja `.env.example` para todas as variáveis disponíveis.
 
 ### **🔄 Task Manager Abstraction - Conceito Central**
 
-O Sistema Onion v3.0 usa uma **camada de abstração** que permite trabalhar com múltiplos gerenciadores de tarefas sem modificar comandos ou workflows. Você escolhe o provedor e todos os comandos funcionam automaticamente.
+O Sistema Onion usa uma **camada de abstração** que permite trabalhar com múltiplos gerenciadores de tarefas sem modificar skills ou workflows. Você escolhe o provedor e todas as skills funcionam automaticamente.
 
 **Como funciona:**
-- ✅ **Interface unificada**: Comandos como `/product/task` funcionam com qualquer provedor
+- ✅ **Interface unificada**: Skills como `/onion-product-task` funcionam com qualquer provedor
 - ✅ **Troca fácil**: Mude `TASK_MANAGER_PROVIDER` no `.env` e tudo continua funcionando
 - ✅ **Fallback gracioso**: Sistema funciona mesmo sem gerenciador configurado (modo offline)
 
 **Provedores suportados:**
 
-| Provedor | Configuração | Agente / roteamento | Notas |
+| Provedor | Configuração | Specialist / roteamento | Notas |
 |----------|--------------|---------------------|-------|
-| **Jira** | `TASK_MANAGER_PROVIDER=jira` | `@jira-specialist` | REST v3/v2, JQL, ADF, transitions, bulk |
-| **ClickUp** | `TASK_MANAGER_PROVIDER=clickup` | `@clickup-specialist` | Via ClickUp MCP, formatação Unicode |
-| **Asana** | `TASK_MANAGER_PROVIDER=asana` | `@task-specialist` (agnóstico) | Notes HTML / plain text |
-| **Linear** | `TASK_MANAGER_PROVIDER=linear` | `@task-specialist` (agnóstico) | Markdown nativo |
-| **None** | `TASK_MANAGER_PROVIDER=none` | `@task-specialist` (offline) | Modo local sem sincronização |
+| **Jira** | `TASK_MANAGER_PROVIDER=jira` | `spawn_agent` → `jira-specialist` | REST v3/v2, JQL, ADF, transitions, bulk |
+| **ClickUp** | `TASK_MANAGER_PROVIDER=clickup` | `spawn_agent` → `clickup-specialist` | Via ClickUp MCP, formatação Unicode |
+| **Asana** | `TASK_MANAGER_PROVIDER=asana` | `spawn_agent` → `task-specialist` (agnóstico) | Notes HTML / plain text |
+| **Linear** | `TASK_MANAGER_PROVIDER=linear` | `spawn_agent` → `task-specialist` (agnóstico) | Markdown nativo |
+| **None** | `TASK_MANAGER_PROVIDER=none` | `spawn_agent` → `task-specialist` (offline) | Modo local sem sincronização |
 
 **Vantagens da abstração:**
 - 🎯 **Flexibilidade**: Escolha o gerenciador que sua equipe já usa
@@ -135,24 +146,24 @@ Após configurar o Task Manager, valide a configuração:
 
 ```bash
 # Verificar comandos disponíveis
-/meta/all-tools  # Deve mostrar comandos disponíveis
+/onion-meta-all-tools  # Deve mostrar comandos disponíveis
 
 # Testar integração de Task Manager (se configurado)
-/product/task "Task de teste do sistema"
+/onion-product-task "Task de teste do sistema"
 # → Deve criar task no provedor ativo (Jira, ClickUp, Asana ou Linear)
 
 # Validar conectividade (depende do provedor configurado)
-/warm-up  # Valida conectividade do Task Manager configurado
+/onion-warmup  # Valida conectividade do Task Manager configurado
 ```
 
 **Se algo não funcionar:**
-- Execute `/meta/setup-integration` novamente para revisar configuração
+- Execute `/onion-meta-setup-integration` novamente para revisar configuração
 - Verifique se `.env` está no `.gitignore` (o comando faz isso automaticamente)
 - Consulte o roteamento conforme o provedor ativo:
-  - `@jira-specialist` para problemas com Jira (verifique `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN`)
-  - `@clickup-specialist` para problemas com ClickUp (verifique `CLICKUP_API_TOKEN`)
-  - Para Asana, verifique a variável `ASANA_ACCESS_TOKEN` no `.env` (roteamento via `@task-specialist`)
-  - Para Linear, verifique a variável `LINEAR_API_KEY` no `.env` (roteamento via `@task-specialist`)
+  - `spawn_agent` → `jira-specialist` para problemas com Jira (verifique `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN`)
+  - `spawn_agent` → `clickup-specialist` para problemas com ClickUp (verifique `CLICKUP_API_TOKEN`)
+  - Para Asana, verifique a variável `ASANA_ACCESS_TOKEN` no `.env` (roteamento via `spawn_agent` → `task-specialist`)
+  - Para Linear, verifique a variável `LINEAR_API_KEY` no `.env` (roteamento via `spawn_agent` → `task-specialist`)
   - Para modo offline, certifique-se que `TASK_MANAGER_PROVIDER=none`
 
 ---
@@ -161,14 +172,14 @@ Após configurar o Task Manager, valide a configuração:
 
 ### **1. Criar Sua Primeira Task (1 min)**
 ```bash
-/product/task "Implementar página de sobre da empresa"
+/onion-product-task "Implementar página de sobre da empresa"
 ```
 
 **Resultado esperado**: Task criada no gerenciador configurado com ID (ex: ABOUT-123)
 
 ### **2. Iniciar Desenvolvimento (1 min)**
 ```bash
-/engineer/start
+/onion-engineer-start
 ```
 
 **Input quando solicitado**: `ABOUT-123`
@@ -177,14 +188,14 @@ Após configurar o Task Manager, valide a configuração:
 
 ### **3. Desenvolver Funcionalidade (2 min)**
 ```bash
-/engineer/work .claude/sessions/about-page/
+/onion-engineer-work .agents/onion/sessions/about-page/
 ```
 
 **Resultado**: Implementação guiada passo-a-passo
 
 ### **4. Criar Pull Request (1 min)**
 ```bash
-/engineer/pr
+/onion-engineer-pr
 ```
 
 **Resultado**: PR criado, Task Manager atualizado com status "in_review"
@@ -198,77 +209,79 @@ Você completou seu primeiro ciclo completo de desenvolvimento com integração 
 
 ### **🆕 Nova Funcionalidade**
 ```bash
-/product/task "Nova funcionalidade X"      # → Task criada no Task Manager
-/engineer/start                           # → Input: TASK-ID  
-/engineer/work .claude/sessions/feature-x/ # → Desenvolvimento
-/engineer/pr                              # → PR + Task Manager atualizado
+/onion-product-task "Nova funcionalidade X"      # → Task criada no Task Manager
+/onion-engineer-start                           # → Input: TASK-ID  
+/onion-engineer-work .agents/onion/sessions/feature-x/ # → Desenvolvimento
+/onion-engineer-pr                              # → PR + Task Manager atualizado
 ```
 
 ### **🐛 Correção de Bug**
 ```bash
-/product/collect "Bug: X não funciona"    # → Bug task criada
-/engineer/start                           # → Fix mode ativo
-/engineer/work "corrigir bug X"           # → Implementação rápida
-/engineer/pr                              # → Hotfix PR
+/onion-product-collect "Bug: X não funciona"    # → Bug task criada
+/onion-engineer-start                           # → Fix mode ativo
+/onion-engineer-work "corrigir bug X"           # → Implementação rápida
+/onion-engineer-pr                              # → Hotfix PR
 ```
 
 ### **📚 Documentação**
 ```bash
-/docs/build-tech-docs                     # → Docs técnicos
-/docs/build-business-docs                 # → Docs de negócio
-/docs/build-index                         # → Índice de projetos
+/onion-docs-build-tech-docs                     # → Docs técnicos
+/onion-docs-build-business-docs                 # → Docs de negócio
+/onion-docs-build-index                         # → Índice de projetos
 ```
 
 ### **⚡ Emergência**
 ```bash
-/product/collect "CRÍTICO: Sistema fora do ar" # → Priority 1 automático
-/engineer/start                                 # → Hotfix mode
-/engineer/work "fix crítico"                    # → Solução rápida
-/engineer/pr                                    # → Deploy imediato
+/onion-product-collect "CRÍTICO: Sistema fora do ar" # → Priority 1 automático
+/onion-engineer-start                                 # → Hotfix mode
+/onion-engineer-work "fix crítico"                    # → Solução rápida
+/onion-engineer-pr                                    # → Deploy imediato
 ```
 
 ---
 
-## 🎯 Comandos Essenciais
+## 🎯 Skills Essenciais
 
-### **📋 Mais Usados (80% dos casos)**
-| Comando | Uso | Frequência |
+### **📋 Mais Usadas (80% dos casos)**
+| Skill | Uso | Frequência |
 |---------|-----|------------|
-| `/product/task` | Criar nova task | 35% |
-| `/engineer/start` | Iniciar desenvolvimento | 25% |
-| `/engineer/work` | Desenvolver funcionalidade | 20% |
-| `/engineer/pr` | Criar Pull Request | 15% |
-| `/all-tools` | Ver comandos disponíveis | 5% |
+| `/onion-product-task` | Criar nova task | 35% |
+| `/onion-engineer-start` | Iniciar desenvolvimento | 25% |
+| `/onion-engineer-work` | Desenvolver funcionalidade | 20% |
+| `/onion-engineer-pr` | Criar Pull Request | 15% |
+| `/onion-meta-all-tools` | Ver skills/ferramentas disponíveis | 5% |
 
 ### **🔧 Para Situações Específicas**
-| Comando | Quando Usar |
+| Skill | Quando Usar |
 |---------|-------------|
-| `/product/collect` | Reportar bugs ou ideias rápidas |
-| `/product/refine` | Melhorar especificação existente |
-| `/product/light-arch` | Esboçar arquitetura inicial |
-| `/engineer/pre-pr` | Validações antes do PR |
-| `/docs/build-*` | Gerar documentação automática |
+| `/onion-product-collect` | Reportar bugs ou ideias rápidas |
+| `/onion-product-refine` | Melhorar especificação existente |
+| `/onion-product-light-arch` | Esboçar arquitetura inicial |
+| `/onion-engineer-pre-pr` | Validações antes do PR |
+| `/onion-docs-build-*` | Gerar documentação automática |
 
 ---
 
-## 🤖 Agentes - Quando Usar
+## 🤖 Specialists - Quando Delegar
+
+Delegue via tool `spawn_agent` apontando para `.agents/onion/specialists/<slug>.md`:
 
 ### **🔵 Para Desenvolvimento**
 ```bash
-@python-developer "implementar API de usuários"    # Python backend
-@react-developer "criar dashboard interativo"      # React frontend  
+spawn_agent → python-developer: "implementar API de usuários"    # Python backend
+spawn_agent → react-developer: "criar dashboard interativo"      # React frontend
 ```
 
 ### **🧪 Para Testes**
 ```bash
-@test-engineer "adicionar testes para função X"    # Testes unitários
-@test-planner "estratégia de testes para módulo Y" # Plano de testes
+spawn_agent → test-engineer: "adicionar testes para função X"    # Testes unitários
+spawn_agent → test-planner: "estratégia de testes para módulo Y" # Plano de testes
 ```
 
 ### **🔍 Para Pesquisa**
 ```bash
-@research-agent "melhores práticas OAuth2 2024"    # Pesquisa tecnológica
-@code-reviewer "revisar qualidade do código Z"     # Code review
+spawn_agent → research-agent: "melhores práticas OAuth2 2024"    # Pesquisa tecnológica
+spawn_agent → code-reviewer: "revisar qualidade do código Z"     # Code review
 ```
 
 ---
@@ -280,9 +293,9 @@ O Sistema Onion sincroniza automaticamente com o Task Manager ativo (Jira, Click
 ### **Estados Automáticos**
 ```mermaid
 graph LR
-    A[/product/task] --> B[to do]
-    B --> C[/engineer/start] --> D[in progress]  
-    D --> E[/engineer/pr] --> F[in progress + under-review]
+    A[/onion-product-task] --> B[to do]
+    B --> C[/onion-engineer-start] --> D[in progress]  
+    D --> E[/onion-engineer-pr] --> F[in progress + under-review]
     F --> G[Merge] --> H[done]
 ```
 
@@ -307,19 +320,22 @@ graph LR
 
 ## 🔧 Troubleshooting Rápido
 
-### **❌ Problema: Comando não encontrado**
+### **❌ Problema: Skill não encontrada**
 ```bash
-# Verificar se está na pasta correta
-pwd  # Deve estar na raiz do projeto com .claude/
+# Verificar se o projeto está aberto como worktree no Zed e com trust concedido
+# Skills ficam em .agents/skills/ (catálogo flat) e exigem worktree trust
+ls -la .agents/skills/
 
-# Listar comandos disponíveis
-/all-tools
+# Listar skills/ferramentas disponíveis
+/onion-meta-all-tools
 ```
+
+> Se as skills não aparecem no Agent Panel, quase sempre é **worktree trust** não concedido ou subpasta indevida dentro de `.agents/skills/` (o catálogo deve ser flat).
 
 ### **❌ Problema: Task Manager não conecta**
 ```bash
 # Validar configuração
-/warm-up
+/onion-warmup
 
 # Verificar provedor configurado primeiro:
 echo $TASK_MANAGER_PROVIDER
@@ -349,7 +365,7 @@ Incorreto: 123, auth123, AUTH123
 ### **❌ Problema: PR falha**
 ```bash
 # Executar validações antes
-/engineer/pre-pr
+/onion-engineer-pre-pr
 
 # Se testes falharem, corrigir primeiro
 npm test  # ou comando apropriado do projeto
@@ -360,18 +376,16 @@ npm test  # ou comando apropriado do projeto
 ## 💡 Dicas Pro
 
 ### **🚀 Para Eficiência Máxima**
-1. **Use aliases** para comandos frequentes:
-   ```bash
-   alias pt="/product/task"
-   alias es="/engineer/start" 
-   alias ew="/engineer/work"
-   alias epr="/engineer/pr"
-   ```
+1. **Use as skills frequentes** diretamente no Agent Panel (digite `/onion-` para autocompletar):
+   - `/onion-product-task`
+   - `/onion-engineer-start`
+   - `/onion-engineer-work`
+   - `/onion-engineer-pr`
 
 2. **Prepare templates** para tasks comuns:
    ```bash
-   pt "Feature: Nova página X com layout responsivo e formulário de contato"
-   pt "Bug: Problema Y em ambiente Z com logs detalhados"
+   /onion-product-task "Feature: Nova página X com layout responsivo e formulário de contato"
+   /onion-product-task "Bug: Problema Y em ambiente Z com logs detalhados"
    ```
 
 3. **Monitore métricas** no seu Task Manager:
@@ -382,7 +396,7 @@ npm test  # ou comando apropriado do projeto
 ### **🎯 Para Qualidade**
 1. **Sempre execute pre-pr** antes de PR crítico
 2. **Use code-reviewer** para mudanças arquiteturais
-3. **Documente decisões** importantes com `/docs/build-*`
+3. **Documente decisões** importantes com `/onion-docs-build-*`
 
 ### **🔄 Para Colaboração**
 1. **Tags consistentes** facilitam filtros no Task Manager
@@ -394,15 +408,15 @@ npm test  # ou comando apropriado do projeto
 ## 📚 Próximos Passos
 
 ### **📖 Aprofundar Conhecimento**
-1. **[Guia de Comandos](commands-guide.md)** - Documentação completa
-2. **[Referência de Ferramentas](tools-reference.md)** - Todas as ferramentas disponíveis em TypeScript
+1. **[Guia de Skills](commands-guide.md)** - Documentação completa
+2. **[Referência de Ferramentas](tools-reference.md)** - Todas as ferramentas nativas do Zed
 3. **[Fluxos de Engenharia](engineering-flows.md)** - Workflows detalhados  
 4. **[Task Manager Abstraction](../knowledge-base/concepts/task-manager-abstraction.md)** - Entenda como funciona a abstração
-5. **Adapters por provedor** - Detalhes específicos de cada um em `.claude/utils/task-manager/adapters/` (`jira.md`, `clickup.md`, `asana.md`, `linear.md`)
+5. **Adapters por provedor** - Detalhes específicos de cada um em `.agents/onion/utils/task-manager/adapters/` (`jira.md`, `clickup.md`, `asana.md`, `linear.md`)
 
 ### **🎯 Cenários Avançados**
 1. **[Exemplos Práticos](practical-examples.md)** - Casos reais de uso
-2. **[Referência de Agentes](agents-reference.md)** - Especialistas disponíveis
+2. **[Referência de Specialists](agents-reference.md)** - Specialists disponíveis
 
 ### **🔧 Personalização**
 1. Configurar webhooks do Task Manager (Jira, ClickUp, Asana ou Linear)
@@ -415,22 +429,22 @@ npm test  # ou comando apropriado do projeto
 ## 🆘 Suporte e Ajuda
 
 ### **📞 Onde Buscar Ajuda**
-1. **Comandos**: `/meta/all-tools` lista tudo disponível
-2. **Status**: `/warm-up` valida configuração do Task Manager
+1. **Skills**: `/onion-meta-all-tools` lista tudo disponível
+2. **Status**: `/onion-warmup` valida configuração do Task Manager
 3. **Documentação**: Arquivos nesta pasta `docs/`
 4. **Task Manager**: Interface web do seu gerenciador (Jira, ClickUp, Asana ou Linear) para validar dados
 
 ### **🐛 Reportar Problemas**
 Se algo não funciona:
-1. Execute `/warm-up` e cole o resultado
-2. Descreva o comando executado
+1. Execute `/onion-warmup` e cole o resultado
+2. Descreva a skill executada
 3. Inclua mensagem de erro completa
 4. Mencione ID da task e provedor configurado (Jira, ClickUp, Asana ou Linear)
 5. Verifique se `TASK_MANAGER_PROVIDER` está configurado corretamente
 
 ### **💬 Comunidade**
 - Compartilhe workflows que funcionam
-- Suggira melhorias nos comandos
+- Sugira melhorias nas skills
 - Documente casos especiais descobertos
 
 ---
@@ -440,7 +454,7 @@ Se algo não funciona:
 Agora você tem tudo para ser produtivo com o sistema Onion:
 
 -  **Setup validado** e funcionando
--  **Primeiros comandos** executados com sucesso  
+-  **Primeiras skills** executadas com sucesso  
 -  **Fluxos principais** compreendidos
 -  **Task Manager configurado** e sincronizando (Jira, ClickUp, Asana, Linear ou modo offline)
 -  **Troubleshooting** na ponta da língua
@@ -487,19 +501,21 @@ sudo apt update
 sudo apt install google-chrome-stable
 ```
 
-### **Problema**: Comandos `.claude/` não funcionam
-**Sintomas**: Comandos não são reconhecidos
+### **Problema**: Skills do Onion não funcionam
+**Sintomas**: Skills `/onion-*` não são reconhecidas no Agent Panel
 
 #### **Solução**:
 ```bash
-# 1. Verificar estrutura .claude/
-ls -la .claude/commands/
+# 1. Verificar estrutura .agents/skills/ (catálogo flat, sem subpastas)
+ls -la .agents/skills/
 
-# 2. Verificar se está no diretório do projeto
-pwd  # Deve estar na raiz com .claude/
+# 2. Verificar se o projeto está aberto como worktree no Zed
+pwd  # Deve estar na raiz com .agents/ e AGENTS.md
 
-# 3. Invocar agente claude-code-specialist
-@claude-code-specialist "comandos não funcionam"
+# 3. Confirmar worktree trust concedido (skills locais + context_servers dependem disso)
+
+# 4. Delegar ao specialist de Zed
+spawn_agent → zed-specialist: "skills /onion-* não funcionam — verificar trust e descoberta"
 ```
 
 ### **Problema**: Integração Task Manager falha
@@ -525,12 +541,12 @@ echo $ASANA_ACCESS_TOKEN; echo $ASANA_WORKSPACE_ID
 echo $LINEAR_API_KEY; echo $LINEAR_TEAM_ID
 
 # 3. Testar conectividade
-/warm-up
+/onion-warmup
 
-# 4. Invocar roteamento conforme provedor ativo:
-@jira-specialist "integração não funciona"     # Para Jira
-@clickup-specialist "integração não funciona"  # Para ClickUp
-# Para Asana/Linear, use @task-specialist ou execute /meta/setup-integration <provedor>
+# 4. Delegar ao specialist conforme provedor ativo (via spawn_agent):
+spawn_agent → jira-specialist: "integração não funciona"     # Para Jira
+spawn_agent → clickup-specialist: "integração não funciona"  # Para ClickUp
+# Para Asana/Linear, delegue a task-specialist ou execute /onion-meta-setup-integration <provedor>
 ```
 
 ---

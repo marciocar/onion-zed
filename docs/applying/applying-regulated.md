@@ -6,7 +6,8 @@
 
 ## Pré-requisitos
 
-- Claude Code instalado
+- **Zed instalado** com provedor de LLM configurado no Agent Panel (ver [applying-greenfield.md](./applying-greenfield.md))
+- **Worktree trust** concedido ao abrir o projeto-alvo no Zed (descoberta de skills e `context_servers`)
 - Git instalado
 - Acesso ao repositório do Onion
 - **Clareza sobre o framework regulatório aplicável** (ou disposição para descobrir via discovery)
@@ -29,19 +30,21 @@ Mesmo projetos que **podem operar sem compliance** se beneficiam deste guia quan
 
 ## Matriz de decisão — Qual framework aplicar
 
-Use a matriz abaixo como ponto de partida. O `@security-information-master` validará e ajustará durante o discovery.
+Use a matriz abaixo como ponto de partida. O specialist `security-information-master` (delegado via `spawn_agent`) validará e ajustará durante o discovery.
 
-| Setor / Cenário | Framework primário | Frameworks complementares | Agentes envolvidos |
+| Setor / Cenário | Framework primário | Frameworks complementares | Specialists envolvidos |
 |---|---|---|---|
-| SaaS B2B (segurança de clientes) | SOC2 Type II | ISO 27001 | `@soc2-specialist`, `@iso-27001-specialist` |
-| Saúde / health-tech | ISO 27001 + SOC2 | LGPD/HIPAA (cobertura parcial) | `@iso-27001-specialist`, `@soc2-specialist` |
-| Financeiro / fintech | ISO 27001 | ISO 22301 (continuidade), SOC2 | `@iso-27001-specialist`, `@iso-22301-specialist` |
-| Governo / setor público | PMBOK + ISO 22301 | ISO 27001 | `@pmbok-specialist`, `@iso-22301-specialist` |
-| Energia / infraestrutura crítica | ISO 22301 | ISO 27001 | `@iso-22301-specialist`, `@iso-27001-specialist` |
-| Anticorrupção / PLD-KYC | Compliance corporativo | ISO 37001 (não coberto) | `@corporate-compliance-specialist` |
-| Startup early-stage | Compliance corporativo básico | ISO 27001 quando crescer | `@corporate-compliance-specialist` |
+| SaaS B2B (segurança de clientes) | SOC2 Type II | ISO 27001 | `soc2-specialist`, `iso-27001-specialist` |
+| Saúde / health-tech | ISO 27001 + SOC2 | LGPD/HIPAA (cobertura parcial) | `iso-27001-specialist`, `soc2-specialist` |
+| Financeiro / fintech | ISO 27001 | ISO 22301 (continuidade), SOC2 | `iso-27001-specialist`, `iso-22301-specialist` |
+| Governo / setor público | PMBOK + ISO 22301 | ISO 27001 | `pmbok-specialist`, `iso-22301-specialist` |
+| Energia / infraestrutura crítica | ISO 22301 | ISO 27001 | `iso-22301-specialist`, `iso-27001-specialist` |
+| Anticorrupção / PLD-KYC | Compliance corporativo | ISO 37001 (não coberto) | `corporate-compliance-specialist` |
+| Startup early-stage | Compliance corporativo básico | ISO 27001 quando crescer | `corporate-compliance-specialist` |
 
-**Decisão final**: orquestrada por `@security-information-master` durante o passo 3.
+Os specialists ficam em `.agents/onion/specialists/<slug>.md` e são delegados via `spawn_agent`.
+
+**Decisão final**: orquestrada pelo specialist `security-information-master` durante o passo 3.
 
 ---
 
@@ -78,14 +81,14 @@ Sem esse mapeamento, a documentação gerada vira "obra-de-arte" sem dono.
 ## Passo 3 — Gerar contexto de compliance
 
 ```bash
-/docs:build-compliance-docs
+/onion-docs-build-compliance-docs
 ```
 
-O comando passa por:
+A skill passa por:
 
 ### Fase 3.1 — Detecção de framework aplicável
 
-`@security-information-master` orquestra:
+O specialist `security-information-master` (via `spawn_agent`) orquestra:
 
 1. Pergunta sobre setor, tamanho, clientes principais, dados manipulados
 2. Compara com matriz de aplicabilidade
@@ -94,9 +97,9 @@ O comando passa por:
 
 ### Fase 3.2 — Discovery por framework
 
-Para cada framework selecionado, o agente especialista coleta:
+Para cada framework selecionado, o specialist correspondente (via `spawn_agent`) coleta:
 
-**ISO 27001 → `@iso-27001-specialist`**:
+**ISO 27001 → `iso-27001-specialist`**:
 
 - Escopo do SGSI (sistemas, processos, equipes)
 - Inventário de ativos
@@ -104,26 +107,26 @@ Para cada framework selecionado, o agente especialista coleta:
 - Controles em vigor (do Anexo A)
 - Gaps conhecidos
 
-**ISO 22301 → `@iso-22301-specialist`**:
+**ISO 22301 → `iso-22301-specialist`**:
 
 - Análise de impacto no negócio (BIA)
 - Processos críticos e RTOs/RPOs
 - Planos de continuidade existentes
 - Cenários de teste
 
-**SOC2 → `@soc2-specialist`**:
+**SOC2 → `soc2-specialist`**:
 
 - Trust Services Criteria aplicáveis (Security obrigatório; Availability, Confidentiality, Processing Integrity, Privacy opcionais)
 - Período de auditoria (Type I ou Type II)
 - Evidências já coletadas
 
-**PMBOK → `@pmbok-specialist`**:
+**PMBOK → `pmbok-specialist`**:
 
 - Performance domains aplicáveis
 - Princípios de gestão adotados
 - Stakeholders, riscos, qualidade, mudanças
 
-**Compliance corporativo → `@corporate-compliance-specialist`**:
+**Compliance corporativo → `corporate-compliance-specialist`**:
 
 - Códigos de conduta vigentes
 - Políticas anticorrupção
@@ -132,7 +135,7 @@ Para cada framework selecionado, o agente especialista coleta:
 
 ### Fase 3.3 — Geração estruturada
 
-O comando preenche `docs/compliance-context/` seguindo estrutura em [docs/compliance-context/README.md](../compliance-context/README.md):
+A skill preenche `docs/compliance-context/` seguindo estrutura em [docs/compliance-context/README.md](../compliance-context/README.md):
 
 ```
 docs/compliance-context/
@@ -151,7 +154,7 @@ Cada camada ativada apenas conforme aplicabilidade do projeto.
 
 Quando múltiplos frameworks aplicam, há controles que se sobrepõem (ex: controle de acesso aparece em ISO 27001, SOC2 Security e Compliance Corporativo).
 
-O `@security-information-master` gera mapa cruzado em `docs/compliance-context/05-audit/cross-framework-map.md`:
+O specialist `security-information-master` gera mapa cruzado em `docs/compliance-context/05-audit/cross-framework-map.md`:
 
 | Controle | ISO 27001 | SOC2 | ISO 22301 | PMBOK |
 |---|---|---|---|---|
@@ -168,7 +171,7 @@ Esse mapa permite **uma única evidência atender múltiplos frameworks** durant
 Após o build, comparar o estado atual (`as-is`) com o estado-alvo de cada framework (`to-be`):
 
 ```bash
-/product:task --source=docs/compliance-context/05-audit/gaps.md
+/onion-product-task --source=docs/compliance-context/05-audit/gaps.md
 ```
 
 Decompõe gaps em tasks executáveis pela equipe técnica e de processos.
@@ -192,22 +195,22 @@ Compliance **não é silo isolado**. Integrar:
 ### Workflow de Produto + Compliance
 
 ```bash
-/product:spec       # Spec deve referenciar requisitos de compliance aplicáveis
-/product:task       # Tasks de compliance entram no mesmo backlog
-/validate:workflow  # Validação inclui critérios de compliance
+/onion-product-spec       # Spec deve referenciar requisitos de compliance aplicáveis
+/onion-product-task       # Tasks de compliance entram no mesmo backlog
+/onion-validate-workflow  # Validação inclui critérios de compliance
 ```
 
 ### Workflow de Engenharia + Compliance
 
 ```bash
-/engineer:plan      # Plano considera controles aplicáveis (ex: logging, criptografia)
-/engineer:pre-pr    # Validação pré-PR inclui checklist de compliance
-/engineer:pr        # PR description referencia controle implementado
+/onion-engineer-plan      # Plano considera controles aplicáveis (ex: logging, criptografia)
+/onion-engineer-pre-pr    # Validação pré-PR inclui checklist de compliance
+/onion-engineer-pr        # PR description referencia controle implementado
 ```
 
 ### Code review com lente de compliance
 
-`@corporate-compliance-specialist` ou `@iso-27001-specialist` podem ser invocados em PRs que tocam em controles sensíveis (autenticação, criptografia, logs de auditoria).
+Os specialists `corporate-compliance-specialist` ou `iso-27001-specialist` podem ser delegados via `spawn_agent` em PRs que tocam em controles sensíveis (autenticação, criptografia, logs de auditoria).
 
 ---
 
@@ -216,7 +219,7 @@ Compliance **não é silo isolado**. Integrar:
 Antes de auditoria externa:
 
 ```bash
-/docs:validate-docs --scope=compliance
+/onion-docs-validate-docs --scope=compliance
 ```
 
 Verifica:
@@ -240,7 +243,7 @@ Verifica:
 
 - Ativar apenas camadas estritamente necessárias inicialmente
 - Adicionar camadas incrementalmente conforme certificação avança
-- Usar `@security-information-master` para priorizar gaps críticos
+- Delegar ao specialist `security-information-master` (via `spawn_agent`) para priorizar gaps críticos
 
 ### Evidências dispersas em múltiplas ferramentas
 
@@ -253,7 +256,7 @@ Verifica:
 ## Checklist de "Onion regulado pronto para auditoria"
 
 - [ ] Framework aplicável definido e aprovado por patrocinador interno
-- [ ] `docs/compliance-context/` populado pelo agente especialista
+- [ ] `docs/compliance-context/` populado pelo specialist correspondente (via `spawn_agent`)
 - [ ] Mapa cruzado de controles gerado
 - [ ] Gaps identificados e em backlog de implementação
 - [ ] Calendário de compliance ativo

@@ -1,6 +1,8 @@
-# 🎮 Claude Code Commands Architecture - Sistema Onion
+# 🎮 Arquitetura de Skills - Sistema Onion
 
-Este documento explica como funcionam os comandos do Sistema Onion e a diferença crítica entre **Claude Code Commands** e comandos de terminal.
+> ⚠️ Doc legado — em revisão para o modelo Zed (ver [ADR 0001](../meta-specs/adr/0001-zed-native-port.md)). No modelo nativo Zed os antigos comandos `/cat/cmd` viraram **skills** `/onion-<categoria>-<comando>` em `.agents/skills/`. Use [commands-guide.md](commands-guide.md) e [tools-reference.md](tools-reference.md) como referência atual.
+
+Este documento explica como funcionam as skills do Sistema Onion e a diferença crítica entre **Skills do Zed** (invocadas no Agent Panel) e comandos de terminal.
 
 ## ⚡ **CONCEITO FUNDAMENTAL: Claude Code Commands**
 
@@ -10,18 +12,18 @@ Claude Code Commands são comandos personalizados executados diretamente no **ch
 ### ✅ **Como Usar (CORRETO)**
 ```markdown
 # No chat da Claude Code:
-/git/init                      # Inicializar Git Flow
-/git/feature/start "login"     # Criar feature branch
-/engineer/work "implement API" # Iniciar desenvolvimento
-/product/task "add dashboard"  # Criar task no ClickUp
+/onion-git-init                      # Inicializar Git Flow
+/onion-git-feature-start "login"     # Criar feature branch
+/onion-engineer-work "implement API" # Iniciar desenvolvimento
+/onion-product-task "add dashboard"  # Criar task no ClickUp
 ```
 
 ### ❌ **Como NÃO Usar (INCORRETO)**
 ```bash
 # ❌ NO TERMINAL - NÃO FUNCIONA:
-$ /git/init                    # Comando não encontrado
-$ ./git/feature/start          # Arquivo não executável
-$ bash /git/init               # Não é script bash direto
+$ /onion-git-init                    # Comando não encontrado
+$ ./onion-git-feature-start          # Arquivo não executável
+$ bash /onion-git-init               # Não é script bash direto
 ```
 
 ---
@@ -30,47 +32,47 @@ $ bash /git/init               # Não é script bash direto
 
 ### 📁 **Estrutura de Arquivos**
 ```
-.claude/commands/
+.agents/skills/
 ├── git/
-│   ├── init.md               # Define /git/init command
-│   ├── help.md               # Define /git/help command
+│   ├── init.md               # Define /onion-git-init command
+│   ├── help.md               # Define /onion-git-help command
 │   └── feature/
-│       ├── start.md          # Define /git/feature/start command
-│       ├── publish.md        # Define /git/feature/publish command
-│       └── finish.md         # Define /git/feature/finish command
+│       ├── start.md          # Define /onion-git-feature-start command
+│       ├── publish.md        # Define /onion-git-feature-publish command
+│       └── finish.md         # Define /onion-git-feature-finish command
 ├── engineer/
-│   ├── start.md              # Define /engineer/start command
-│   └── work.md               # Define /engineer/work command
+│   ├── start.md              # Define /onion-engineer-start command
+│   └── work.md               # Define /onion-engineer-work command
 └── product/
-    ├── task.md               # Define /product/task command
-    └── spec.md               # Define /product/spec command
+    ├── task.md               # Define /onion-product-task command
+    └── spec.md               # Define /onion-product-spec command
 ```
 
 ### 🔄 **Fluxo de Execução**
 
 | Passo | Camada | Tecnologia | Função |
 |-------|--------|------------|--------|
-| 1 | **Interface** | Claude Code Chat | Usuário digita `/git/init` |
+| 1 | **Interface** | Claude Code Chat | Usuário digita `/onion-git-init` |
 | 2 | **Detecção** | Claude Code AI | Reconhece comando personalizado |
-| 3 | **Carregamento** | File System | Lê `.claude/commands/git/init.md` |
+| 3 | **Carregamento** | File System | Lê `.agents/skills/onion-git-init.md` |
 | 4 | **Interpretação** | Claude Code AI | Analisa workflow definido |
 | 5 | **Execução** | Scripts | Executa bash/python dentro do workflow |
-| 6 | **UX** | Modern CLI | `.claude/utils/modern-cli-ux.sh` |
+| 6 | **UX** | Modern CLI | `.agents/onion/utils/modern-cli-ux.sh` |
 | 7 | **Feedback** | Claude Code Chat | Resposta rica e educativa |
 
 ---
 
-## 🎯 **Exemplo Detalhado: `/git/init`**
+## 🎯 **Exemplo Detalhado: `/onion-git-init`**
 
 ### 📝 **1. Usuário Executa Comando**
 ```markdown
 # No chat da Claude Code:
-User: /git/init
+User: /onion-git-init
 ```
 
 ### 📄 **2. Claude Code Carrega Definição**
 ```markdown
-# Arquivo: .claude/commands/git/init.md
+# Arquivo: .agents/skills/onion-git-init.md
 # Define workflow completo de inicialização Git Flow
 ```
 
@@ -123,7 +125,7 @@ User: /git/init
 ### 📝 **Criando Novos Comandos**
 ```markdown
 # 1. Criar arquivo markdown:
-.claude/commands/category/command.md
+.agents/skills/category/command.md
 
 # 2. Definir cabeçalho com metadados
 # 3. Escrever workflow em bash/python
@@ -134,7 +136,7 @@ User: /git/init
 ### 🎨 **Padrões UX**
 ```bash
 # Usar funções da biblioteca UX:
-source "$HOME/.claude/utils/modern-cli-ux.sh"
+source "$HOME/.agents/onion/utils/modern-cli-ux.sh"
 
 cli_header "TITLE" "color"          # Headers consistentes
 cli_success_box "TITLE" "message"   # Success feedback  
@@ -185,7 +187,7 @@ session_update $NAME                # Atualizar contexto
 
 ### ✅ **São Claude Code Commands Porque:**
 -  **Executados no chat** da Claude Code
--  **Definidos em markdown** na pasta `.claude/commands/`
+-  **Definidos em markdown** na pasta `.agents/skills/`
 -  **Interpretados pela Claude Code AI** com context awareness
 -  **Integrados ao ambiente** de desenvolvimento
 
